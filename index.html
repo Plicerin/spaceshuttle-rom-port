@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#04060e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Space Shuttle">
+  <link rel="apple-touch-icon" href="img/icon-180.png">
+  <title>Space Shuttle — Atari 2600, 1983</title>
+  <meta name="description" content="Steve Kitchen's Space Shuttle: A Journey into Space for the Atari 2600, translated from the cartridge instruction by instruction and checked against the real ROM frame by frame.">
+  <link rel="icon" href="img/icon-192.png">
+  <style>
+    /* Same landing-page system as the other ROM ports, in Space Shuttle's TIA colors. */
+    :root {
+      --lp-night: #04060e;
+      --lp-panel: #0f1630;
+      --lp-panel-2: #0a1022;
+      --lp-line: #1f2c52;
+      --lp-line-2: #30427a;
+      --lp-ink: #eceefa;
+      --lp-ink-2: #aeb2d6;
+      --lp-ink-3: #70749a;
+      --lp-accent: #4058c8;    /* the cockpit windows' blue */
+      --lp-accent-2: #5d74e0;
+      --lp-robot: #d89a4c;     /* the instrument panel's tan */
+      --lp-player: #e8c070;
+      --lp-link: #9aa0ff;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(120% 70% at 50% -10%, #162050 0%, transparent 60%), var(--lp-night);
+      color: var(--lp-ink-2);
+      font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    main { width: min(1120px, 100%); }
+    code, kbd { font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace; }
+    code { color: var(--lp-ink); }
+    a { color: var(--lp-link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; }
+    kbd {
+      display: inline-block; min-width: 1.5em; padding: 1px 6px; text-align: center;
+      border: 1px solid #3c3c78; border-bottom-width: 3px; border-radius: 5px;
+      background: #181838; color: var(--lp-ink); font-size: 11px; line-height: 1.5;
+    }
+
+    .lp-hero { padding: 40px 0 26px; text-align: center; }
+    .lp-maze { margin: 0 auto 24px; max-width: 360px; height: 16px; opacity: 0.9;
+      background: linear-gradient(var(--lp-accent), var(--lp-accent)) left top / 40% 6px no-repeat, linear-gradient(var(--lp-accent), var(--lp-accent)) right top / 40% 6px no-repeat, linear-gradient(var(--lp-accent), var(--lp-accent)) left top / 6px 100% no-repeat, linear-gradient(var(--lp-accent), var(--lp-accent)) right top / 6px 100% no-repeat; }
+    .lp-hero h1 {
+      font-size: clamp(36px, 10vw, 88px); line-height: 0.95; margin: 0; color: #fff; font-weight: 800;
+      letter-spacing: clamp(2px, 1.2vw, 12px); text-transform: uppercase; text-indent: clamp(2px, 1.2vw, 12px);
+      text-shadow: 0 2px 0 #2a2e8a, 0 0 46px rgba(84, 92, 214, 0.6);
+    }
+    .lp-hero .lp-year { margin-top: 14px; font-size: 11px; letter-spacing: 5px; text-transform: uppercase; color: var(--lp-ink-3); }
+    .lp-hero .lp-sub { margin: 18px auto 0; max-width: 620px; font-size: 16px; line-height: 1.6; }
+    .lp-hero .lp-sub b { color: var(--lp-ink); font-weight: 600; }
+    .lp-cta { display: flex; justify-content: center; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+    .lp-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px;
+      font-weight: 600; font-size: 14px; border: 1px solid var(--lp-line-2); background: var(--lp-panel);
+      color: var(--lp-ink); cursor: pointer; font-family: inherit; transition: transform 0.12s, background 0.12s, border-color 0.12s;
+    }
+    .lp-btn:hover { transform: translateY(-1px); border-color: #4a4aa0; text-decoration: none; }
+    .lp-btn.primary { background: var(--lp-accent); border-color: #3a40a0; color: #fff; }
+    .lp-btn.primary:hover { background: var(--lp-accent-2); }
+
+    .canvas-shell {
+      width: min(760px, 100%); margin: 0 auto; padding: 18px; border: 1px solid #2a2a58; border-radius: 20px;
+      background: linear-gradient(180deg, #181838 0%, #08081a 100%);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    /* Full screen: the game and its touch controls fill the screen. Uses the
+       browser's fullscreen where allowed; iPhone Safari only lets video go
+       fullscreen, so there the page does it with fixed positioning. */
+    .fs-exit { display: none; }
+    body.fs { overflow: hidden; }
+    body.fs main > :not(#play):not(#tc) { display: none; }
+    body.fs #play {
+      position: fixed; inset: 0; z-index: 10; width: auto; margin: 0; border: 0; border-radius: 0; box-shadow: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+      background: var(--lp-night);
+    }
+    body.fs .tv { width: min(100%, calc((100dvh - 60px) * 640 / 392)); }
+    body.fs .fs-exit {
+      display: block; position: absolute; z-index: 12; top: max(10px, env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right));
+      font: 11px ui-monospace, "Cascadia Mono", monospace; padding: 6px 11px; border-radius: 8px;
+      border: 1px solid var(--lp-line-2); background: rgba(12, 12, 30, 0.85); color: var(--lp-ink); cursor: pointer;
+    }
+    body.fs #tc {
+      position: fixed; z-index: 11; left: 0; right: 0; bottom: 0; width: auto; margin: 0;
+      padding: 12px max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    }
+    @media (pointer: coarse) and (orientation: portrait) {
+      body.fs .tv { width: min(100%, calc((100dvh - 260px) * 640 / 392)); }
+    }
+    @media (pointer: coarse) and (orientation: landscape) {
+      body.fs .tv { width: min(calc(100% - 250px), calc((100dvh - 30px) * 640 / 392)); }
+      body.fs #status-line { display: none; }
+      body.fs #tc { pointer-events: none; }
+      body.fs #tc button { pointer-events: auto; opacity: 0.8; }
+      body.fs .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 40px); }
+      body.fs .fire { width: 76px; height: 76px; }
+    }
+    .tv { position: relative; }
+    .tv canvas, .poster img {
+      display: block; width: 100%; height: auto; aspect-ratio: 640 / 392;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+    }
+    .tv canvas { border-radius: 6px; border: 1px solid #000; box-shadow: 0 0 0 2px #23234a, inset 0 0 40px rgba(0, 0, 0, 0.8); background: #000; outline: none; }
+    .tv canvas:focus-visible { box-shadow: 0 0 0 2px var(--lp-accent); }
+    .poster { position: absolute; inset: 0; display: grid; place-items: center; }
+    .poster[hidden] { display: none; }
+    .poster img { position: absolute; inset: 0; height: 100%; border-radius: 6px; }
+    .poster .lp-btn { position: relative; font-size: 16px; padding: 13px 26px; box-shadow: 0 14px 30px -6px #000; }
+    #status-line { margin-top: 14px; font-size: 10px; color: var(--lp-ink-3); letter-spacing: 1px; text-align: center; line-height: 1.9; text-transform: uppercase; font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace; }
+
+    #tc { display: none; justify-content: space-between; align-items: center; width: 340px; max-width: 100%; margin: 14px auto 0; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .dpad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 48px); gap: 4px; }
+    .dpad button, .fire { font: 700 18px/1 ui-sans-serif, system-ui, sans-serif; color: var(--lp-ink); background: var(--lp-panel); border: 1px solid var(--lp-line-2); border-radius: 8px; touch-action: none; }
+    .dpad [data-hold="up"] { grid-area: 1 / 2; }
+    .dpad [data-hold="left"] { grid-area: 2 / 1; }
+    .dpad [data-hold="right"] { grid-area: 2 / 3; }
+    .dpad [data-hold="down"] { grid-area: 3 / 2; }
+    .fire { width: 92px; height: 92px; border-radius: 50%; background: #f0aa67; border-color: #8a5a2a; color: #1a0f05; color: #fff; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+    @media (pointer: coarse) { #tc { display: flex; } }
+
+    .lp-tray { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; width: min(760px, 100%); margin: 14px auto 0; padding: 0 4px; font-size: 12px; color: var(--lp-ink-3); }
+    .lp-tray .switches { display: flex; flex-wrap: wrap; gap: 8px; }
+    .lp-tray button { font: 11px ui-monospace, "Cascadia Mono", "Courier New", monospace; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--lp-line); background: var(--lp-panel); color: var(--lp-ink-2); cursor: pointer; }
+    .lp-tray button:hover { border-color: var(--lp-line-2); color: var(--lp-ink); }
+    .lp-tray button[aria-pressed="true"] { color: var(--lp-accent); border-color: #3a40a0; }
+
+    .panel.lp { width: min(1000px, 100%); margin: 44px auto 0; padding: 26px clamp(16px, 3vw, 30px); border: 1px solid var(--lp-line); border-radius: 16px; background: linear-gradient(180deg, var(--lp-panel) 0%, var(--lp-panel-2) 100%); }
+    .panel.lp h2 { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--lp-accent); margin: 0 0 10px; }
+    .panel.lp > p.lp-lead { font-size: 15px; line-height: 1.65; margin: 0 0 20px; max-width: 70ch; }
+    .panel.lp p.lp-lead b { color: var(--lp-ink); font-weight: 600; }
+    .lp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .lp-card { padding: 18px; border: 1px solid var(--lp-line); border-radius: 12px; background: rgba(255, 255, 255, 0.016); min-width: 0; }
+    .lp-card h3 { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; font-size: 14px; color: var(--lp-ink); font-weight: 600; letter-spacing: 0.02em; }
+    .lp-card h3 .pts { margin-left: auto; font: 600 12px/1 ui-monospace, "Cascadia Mono", monospace; color: var(--lp-robot); }
+    .lp-card p { font-size: 13.5px; line-height: 1.6; margin: 0 0 9px; }
+    .lp-card p:last-child { margin-bottom: 0; }
+    .lp-card b { color: var(--lp-ink); font-weight: 600; }
+    .lp-card .plate { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px; min-height: 110px; padding: 10px; margin: -4px 0 14px; border-radius: 8px; background: #000; }
+    .lp-card .plate img { image-rendering: pixelated; max-width: 100%; max-height: 120px; width: auto; }
+    ul.lp-keys { list-style: none; margin: 0; padding: 0; }
+    ul.lp-keys li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; }
+    ul.lp-keys li:first-child { border-top: 0; }
+    ul.lp-keys li > span:last-child { text-align: right; flex: 0 0 auto; }
+    .lp-aside { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--lp-accent); background: rgba(84, 92, 214, 0.08); border-radius: 0 10px 10px 0; font-size: 13.5px; line-height: 1.6; }
+    .lp-aside b { color: var(--lp-ink); }
+    .lp-aside ul { margin: 8px 0 0 18px; }
+    .lp-aside li { margin: 4px 0; }
+
+    .screens { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+    .screens figure { margin: 0; }
+    .screens img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--lp-line); image-rendering: pixelated; }
+    .screens figcaption { margin-top: 8px; font-size: 12.5px; line-height: 1.5; color: var(--lp-ink-3); }
+
+    .lp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 4px; }
+    .lp-stat { padding: 16px; border: 1px solid var(--lp-line); border-radius: 12px; text-align: center; background: rgba(255, 255, 255, 0.016); }
+    .lp-stat .n { display: block; font-size: 30px; line-height: 1.1; font-weight: 700; color: var(--lp-accent); font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace; font-variant-numeric: tabular-nums; }
+    .lp-stat .t { display: block; margin-top: 7px; font-size: 12px; line-height: 1.45; color: var(--lp-ink-3); }
+
+    details.lp-dev { width: min(1000px, 100%); margin: 0 auto; }
+    details.lp-dev > summary { cursor: pointer; list-style: none; margin-top: 40px; padding: 13px 16px; border: 1px solid var(--lp-line); border-radius: 12px; background: var(--lp-panel-2); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--lp-ink-3); font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace; }
+    details.lp-dev > summary::-webkit-details-marker { display: none; }
+    details.lp-dev > summary:hover { color: var(--lp-ink-2); border-color: var(--lp-line-2); }
+    details.lp-dev ul { list-style: none; padding: 16px 4px 0; display: grid; gap: 8px; font-size: 13px; }
+
+    .lp-foot { width: min(1000px, 100%); margin: 40px auto 0; padding: 22px 4px 56px; border-top: 1px solid var(--lp-line); font-size: 12px; line-height: 1.6; color: var(--lp-ink-3); display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; }
+    .lp-foot p { max-width: 70ch; }
+
+    @media (max-width: 640px) {
+      .panel.lp { margin-top: 28px; padding: 20px 16px; }
+      .lp-hero { padding: 28px 0 18px; }
+      .lp-hero .lp-sub { font-size: 15px; }
+    }
+    .lp-home { display: inline-block; margin-bottom: 22px; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--lp-ink-3); text-decoration: none; }
+    .lp-home:hover { color: var(--lp-ink); }
+  
+    .lp-stars { margin: 0 auto 24px; max-width: 360px; height: 16px; opacity: 0.85;
+      background: radial-gradient(circle, #fff 1px, transparent 1.5px) 0 0 / 23px 9px, radial-gradient(circle, #9fb0ff 1px, transparent 1.5px) 11px 5px / 31px 11px; }
+    .deck { width: min(760px, 100%); margin: 14px auto 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
+    .deck button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--lp-line-2); background: var(--lp-panel); color: var(--lp-ink-2); cursor: pointer; font: 12px/1.3 ui-sans-serif, system-ui, sans-serif; text-align: left; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .deck button:hover { border-color: var(--lp-accent-2); color: var(--lp-ink); }
+    .deck button b { color: var(--lp-ink); font-weight: 600; }
+    .deck button small { font: 10px/1.3 ui-monospace, "Cascadia Mono", monospace; letter-spacing: 1px; color: var(--lp-ink-3); }
+    .deck [data-state] { font: 600 11px/1.3 ui-monospace, "Cascadia Mono", monospace; letter-spacing: 1px; color: var(--lp-ink-3); }
+    .deck button[aria-pressed="true"] { border-color: var(--lp-robot); }
+    .deck button[aria-pressed="true"] [data-state] { color: var(--lp-robot); }
+    .deck button[data-press]:active { border-color: var(--lp-robot); background: #1a2448; }
+    .vol { display: inline-flex; align-items: center; gap: 6px; font: 11px ui-monospace, "Cascadia Mono", monospace; color: var(--lp-ink-2); }
+    .vol input { width: 90px; accent-color: var(--lp-accent); }
+    ol.lp-steps { margin: 0 0 0 20px; font-size: 13.5px; line-height: 1.6; }
+    ol.lp-steps li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<main>
+  <header class="lp-hero">
+    <a class="lp-home" href="https://plicerin.github.io/">&larr; All games</a>
+    <div class="lp-stars" aria-hidden="true"></div>
+    <h1>Space Shuttle</h1>
+    <div class="lp-year">Activision · Atari 2600 · 1983</div>
+    <p class="lp-sub">Steve Kitchen's flight simulator: launch the Discovery from Cape Canaveral, dock with a tumbling satellite 210 nautical miles up, burn for home and land at Edwards, with every console switch wired into the cockpit. The cartridge's own program, <b>translated into JavaScript one instruction at a time</b> with every cycle counted, so the flight behaves exactly as on the console.</p>
+    <div class="lp-cta">
+      <a class="lp-btn primary" href="#play">Play now</a>
+      <a class="lp-btn" href="#how">How to fly</a>
+      <a class="lp-btn" href="#rom">How it was built</a>
+    </div>
+  </header>
+
+  <div id="play" class="canvas-shell">
+    <div class="tv">
+      <canvas width="640" height="392" tabindex="0" aria-label="Space Shuttle. Arrow keys or WASD for the hand controller, Space or Z for its button, E Primary Engines, B Backup Engines, C Cargo Doors and Landing Gear, hold X for Status, hold Enter to activate the countdown."></canvas>
+      <div class="poster" data-poster>
+        <img src="img/start.png" alt="The flight deck before launch: two cockpit windows full of stars, the instrument strip, the NASA panel reading STS 101, and Copyright 1983." width="640" height="392">
+        <button class="lp-btn primary" type="button" data-play>Power on</button>
+      </div>
+    </div>
+    <div id="status-line" data-hint aria-live="polite">Press Power on, then hold Status to pick a flight</div>
+    <div class="deck" aria-label="Flight deck console">
+      <button type="button" data-press="status"><b>Status</b><small>hold · X · Game Select</small></button>
+      <button type="button" data-press="countdown"><b>Activate Countdown</b><small>hold · Enter · Game Reset</small></button>
+      <button type="button" data-toggle="primary" aria-pressed="false"><b>Primary Engines</b><span data-state>SHUTDOWN</span><small>E · Color/B&amp;W</small></button>
+      <button type="button" data-toggle="backup" aria-pressed="false"><b>Backup Engines</b><span data-state>SHUTDOWN</span><small>B · left difficulty</small></button>
+      <button type="button" data-toggle="doors" aria-pressed="false"><b>Cargo Doors / Gear</b><span data-state>CLOSED / UP</span><small>C · right difficulty</small></button>
+    </div>
+    <button type="button" class="fs-exit" data-exit>Exit full screen</button>
+  </div>
+  <div id="tc" aria-label="Touch controls">
+    <div class="dpad">
+      <button type="button" data-hold="up" aria-label="Up">▲</button>
+      <button type="button" data-hold="left" aria-label="Left">◀</button>
+      <button type="button" data-hold="right" aria-label="Right">▶</button>
+      <button type="button" data-hold="down" aria-label="Down">▼</button>
+    </div>
+    <button type="button" class="fire" data-hold="fire">Fire</button>
+  </div>
+  <div class="lp-tray">
+    <div><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> hand controller · <kbd>Space</kbd> its button</div>
+    <div class="switches">
+      <button type="button" data-pause>Pause</button>
+      <button type="button" data-mute aria-pressed="false">Mute</button>
+      <label class="vol">Volume <input type="range" min="0" max="100" value="70" data-volume aria-label="Volume"></label>
+      <button type="button" id="lp-fullscreen">Fullscreen</button>
+    </div>
+  </div>
+
+  <section class="panel lp" id="how">
+    <h2>How to fly</h2>
+    <p class="lp-lead">Your mission is STS 101: reach orbit, rendezvous and dock with a satellite whose gyroscopes are deliberately misbehaving, as many times as you can on as little fuel as you can, then come home. <b>Every console switch is a cockpit control</b>, so the switches under the screen matter as much as the joystick. Start with <b>flight 1</b>: it flies the whole mission by itself, and hands you the controls when you touch the joystick.</p>
+    <div class="lp-grid">
+      <div class="lp-card">
+        <h3>Flight deck console</h3>
+        <ul class="lp-keys">
+          <li><span>Status (flight select, readouts)</span><span>hold <kbd>X</kbd></span></li>
+          <li><span>Activate Countdown</span><span>hold <kbd>Enter</kbd></span></li>
+          <li><span>Primary Engines on / shut down</span><span><kbd>E</kbd></span></li>
+          <li><span>Backup Engines on / shut down</span><span><kbd>B</kbd></span></li>
+          <li><span>Cargo Doors / Landing Gear</span><span><kbd>C</kbd></span></li>
+          <li><span>Hand controller · its button</span><span>arrows / WASD · <kbd>Space</kbd></span></li>
+          <li><span>Pause · Mute</span><span><kbd>P</kbd> · <kbd>M</kbd></span></li>
+        </ul>
+        <p style="margin-top: 12px">On a real 2600 these are Game Select, Game Reset, the Color/B&amp;W switch and the two difficulty switches. The Backup Engines are for consoles where the Color/B&amp;W switch is hard to reach; otherwise leave them shut down.</p>
+      </div>
+      <div class="lp-card">
+        <h3>Three flights</h3>
+        <p><b>1 · Autosimulator.</b> A demonstration that flies an abbreviated mission. Touch the joystick and you have the controls.</p>
+        <p><b>2 · Simulator.</b> The real procedure, but fuel is never used up and the computers forgive most mistakes.</p>
+        <p><b>3 · STS 101.</b> The full flight: every abort is live. Your rank at the end depends on how many dockings you made and the fuel you have left.</p>
+        <p>Hold Status before the countdown to change the flight number.</p>
+      </div>
+      <div class="lp-card">
+        <h3>Launch, step by step</h3>
+        <ol class="lp-steps">
+          <li>Primary and Backup Engines shut down, cargo doors closed: the countdown won't start otherwise.</li>
+          <li>Hold Activate Countdown.</li>
+          <li>At MET&minus;015, Primary Engines on.</li>
+          <li>At MET&minus;004, hold the button to ignite, and keep the thrust arrow T on the computer's arrow C.</li>
+          <li>Follow the trajectory on the tracking screen; left and right correct your plane.</li>
+          <li>Shut down at about 205 nautical miles.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="lp-aside"><b>After launch</b>
+      <ul>
+        <li><b>Stable orbit:</b> engines on, pitch the nose down to &minus;28, engines off, then open the cargo bay doors within the first orbit, or the heat builds up and the mission is aborted.</li>
+        <li><b>Docking:</b> match the satellite's speed (mach 23.9) and line up on all three axes. Each successful docking earns fuel; each one after it is harder.</li>
+        <li><b>Deorbit and reentry:</b> let the satellite drift 128 miles away, turn tail-first, burn down to mach 19.0, then turn back nose-first for reentry.</li>
+        <li><b>Landing:</b> lower the gear (the same switch as the doors) and put it down at Edwards Air Force Base.</li>
+      </ul>
+      The original manual explains every readout; this is the short version.</div>
+  </section>
+
+  <section class="panel lp" id="flight">
+    <h2>The mission</h2>
+    <div class="screens">
+      <figure><img src="img/launch.png" alt="Climbing through the clouds after launch; the computer screen shows the launch trajectory." width="640" height="392"><figcaption>Launch: through the clouds over Cape Canaveral, with the trajectory on the computer screen.</figcaption></figure>
+      <figure><img src="img/orbit.png" alt="In orbit with the satellite visible in the right window." width="640" height="392"><figcaption>Orbit: the satellite in the right window, 210 nautical miles up.</figcaption></figure>
+      <figure><img src="img/reentry.png" alt="Reentry: both windows filled with the glow of the atmosphere." width="640" height="392"><figcaption>Reentry: the windows fill with the glow of the atmosphere.</figcaption></figure>
+      <figure><img src="img/landing.png" alt="Final approach over the desert toward the runway at Edwards." width="640" height="392"><figcaption>Landing: final approach over the desert to the runway at Edwards.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="panel lp" id="rom">
+    <h2>Built from the ROM</h2>
+    <p class="lp-lead">This is not an emulator, and not a remake. The cartridge was disassembled from scratch (no published source existed), reassembled to prove the disassembly <b>byte for byte identical</b> to the cartridge, and then a translator wrote out <b>each instruction as a line of JavaScript</b> with its cycle count. The translated game runs on a model of the 2600's TIA and RIOT chips, and a 6502 core runs the real ROM beside it to prove the two match.</p>
+    <div class="lp-stats">
+      <div class="lp-stat"><span class="n">0</span><span class="t">differences from the cartridge in 105,000 compared frames: registers, bank, cycles, RAM, chip writes and pixels</span></div>
+      <div class="lp-stat"><span class="n">3,002</span><span class="t">instructions translated, each with its cycle count</span></div>
+      <div class="lp-stat"><span class="n">45,000</span><span class="t">frames of the autosimulator's mission, launch to landing, among them</span></div>
+      <div class="lp-stat"><span class="n">8,192</span><span class="t">bytes in the whole cartridge: two 4K banks</span></div>
+    </div>
+    <div class="lp-aside"><b>Read in the ROM.</b> A few things the code shows:
+      <ul>
+        <li>The cartridge has two 4K banks and switches them every frame: the game logic jumps to the start of its bank, where the first instruction reads a hotspot address that selects the other bank, which then carries on with the screen.</li>
+        <li>The engine check reads the Color/B&amp;W switch and the left difficulty switch together, so either one fires the engines: that is how the Backup Engines can stand in for the Primary ones.</li>
+        <li>Before the countdown will start, the code checks that both engine switches and the cargo door switch are all off.</li>
+        <li>In fifteen places one instruction hides another: a <code>BIT</code> instruction swallows the next two bytes on one path, while another path jumps straight into them.</li>
+      </ul>
+      The port keeps all of it, because that is the game.</div>
+  </section>
+
+  <footer class="lp-foot">
+    <p><i>Space Shuttle: A Journey into Space</i> is © 1983 Activision, designed by Steve Kitchen. An unofficial preservation project, not affiliated with Activision or NASA. Colors from Stella's NTSC palette. The ROM file is not included.</p>
+  </footer>
+</main>
+
+<script type="module">
+  import { mountPlayer } from './src/shuttlePlayer.mjs';
+  const shell = document.getElementById('play');
+  window.__shuttle = mountPlayer(shell.parentElement);
+  // full screen: the browser's own where allowed (desktop, Android, iPad), and
+  // the same layout without it on iPhone, where only video may go fullscreen
+  const root = document.documentElement;
+  const nativeElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const canNative = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  const setFull = (on) => {
+    document.body.classList.toggle('fs', on);
+    shell.querySelector('canvas').focus({ preventScroll: true });
+  };
+  const enter = () => {
+    setFull(true);
+    if (canNative) (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root)?.catch?.(() => {});
+  };
+  const leave = () => {
+    if (nativeElement()) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    setFull(false);
+  };
+  document.getElementById('lp-fullscreen').addEventListener('click', () => (document.body.classList.contains('fs') ? leave() : enter()));
+  shell.querySelector('[data-exit]').addEventListener('click', leave);
+  for (const event of ['fullscreenchange', 'webkitfullscreenchange']) {
+    document.addEventListener(event, () => { if (!nativeElement()) setFull(false); });
+  }
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && document.body.classList.contains('fs') && !nativeElement()) leave(); });
+</script>
+</body>
+</html>
