@@ -1,11 +1,12 @@
-// Reads the first connected gamepad (standard mapping) as an Atari joystick:
-// left stick or D-pad to fly, A/B/X/Y to fire, Start for Game Reset, Back/Select
-// to pause. readGamepad() returns the current state; edges() reports the
-// Start/Back presses that happened since the last call.
+// Reads the first connected gamepad (standard mapping) as the Atari joystick
+// and the console: left stick or D-pad to fly, A/B/X/Y to fire, Start held for
+// Activate Countdown (Game Reset), Back/Select held for Status (Game Select),
+// the bumpers and left trigger to flip the switches. readGamepad() returns
+// the current state; gamepadEdges() reports the presses since the last call.
 
 const DEADZONE = 0.45;
-let lastStart = false;
-let lastBack = false;
+const EDGES = ['start', 'back', 'lb', 'rb', 'lt'];
+const last = {};
 
 export function readGamepad() {
   const pads = navigator.getGamepads ? navigator.getGamepads() : [];
@@ -21,14 +22,19 @@ export function readGamepad() {
     fire: button(0) || button(1) || button(2) || button(3),
     start: button(9),
     back: button(8),
+    lb: button(4),
+    rb: button(5),
+    lt: button(6),
   };
 }
 
-// presses of Start and Back since the last call
+// presses of Start, Back, the bumpers and the left trigger since the last call
 export function gamepadEdges(state) {
-  const start = !!state?.start, back = !!state?.back;
-  const edges = { start: start && !lastStart, back: back && !lastBack };
-  lastStart = start;
-  lastBack = back;
+  const edges = {};
+  for (const name of EDGES) {
+    const now = !!state?.[name];
+    edges[name] = now && !last[name];
+    last[name] = now;
+  }
   return edges;
 }

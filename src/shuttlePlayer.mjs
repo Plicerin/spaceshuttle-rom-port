@@ -1,6 +1,6 @@
 // Playable Space Shuttle for the site: the translated cartridge
 // (shuttleMachine.mjs) on a canvas, keyboard input while the game has focus,
-// a gamepad, touch buttons on phones, the TIA sound worklet, and the flight
+// a gamepad (switches on Start, Back, the bumpers and left trigger), touch buttons on phones, the TIA sound worklet, and the flight
 // deck console: the cartridge reads every console switch as a cockpit control.
 //   Color/B&W          Primary Engines   (Color = on)
 //   Left difficulty    Backup Engines    (A = on)
@@ -26,6 +26,8 @@ const TOGGLES = {
   backup: { key: 'KeyB', name: 'Backup Engines', on: 'ON', off: 'SHUTDOWN' },
   doors: { key: 'KeyC', name: 'Cargo Doors / Gear', on: 'OPEN / DOWN', off: 'CLOSED / UP' },
 };
+// the pad's console buttons: Start holds Activate Countdown, Back holds Status
+const PAD = { countdown: 'start', status: 'back' };
 const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* fine */ } } };
 
 export function mountPlayer(root) {
@@ -56,7 +58,7 @@ export function mountPlayer(root) {
   // countdown waits for all three)
   const toggles = { primary: false, backup: false, doors: false };
   const down = { status: false, countdown: false };
-  let last = 0, acc = 0, pad = null, frames = 0;
+  let last = 0, acc = 0, pad = null, frames = 0, padShown = false, padWake = false;
 
   const setHint = (text) => { if (hint && hint.textContent !== text) hint.textContent = text; };
   // the hint follows the flight: the cartridge's flight number ($A0), whether
@@ -76,14 +78,14 @@ export function mountPlayer(root) {
   }
   function showNote() {
     if (!note) return;
-    const text = paused ? 'PAUSED' : started && !touch && document.activeElement !== canvas ? 'Click the screen to use the keyboard' : '';
+    const text = paused ? 'PAUSED' : started && !touch && !pad && document.activeElement !== canvas ? 'Click the screen to use the keyboard' : '';
     note.textContent = text;
     note.hidden = !text;
   }
   const silence = () => audio.setSilent(muted || paused || !started);
 
   function step() {
-    const on = (control) => held.has(control) || tapped.has(control) || !!down[control] || !!pad?.[control];
+    const on = (control) => held.has(control) || tapped.has(control) || !!down[control] || !!(PAD[control] ? !padWake && pad?.[PAD[control]] : pad?.[control]);
     let swcha = 0xff;
     if (on('right')) swcha &= ~0x80;
     if (on('left')) swcha &= ~0x40;
@@ -124,8 +126,13 @@ export function mountPlayer(root) {
     last = t;
     pad = readGamepad();
     const edges = gamepadEdges(pad);
-    if (edges.start && !started) play();
-    if (edges.back && started) togglePause();
+    // the Start or Back press that powers on doesn't also count as Activate Countdown or Status
+    if ((edges.start || edges.back) && !started) { play(); padWake = true; }
+    if (padWake && !pad?.start && !pad?.back) padWake = false;
+    if (edges.lb) flip('primary');
+    if (edges.rb) flip('doors');
+    if (edges.lt) flip('backup');
+    if (!!pad !== padShown) { padShown = !!pad; showNote(); }
     if (!paused && !document.hidden) {
       acc += dt;
       while (acc >= FRAME_MS) { step(); acc -= FRAME_MS; }

@@ -23,6 +23,13 @@ Every console switch is a cockpit control; the page has buttons for them.
 | Right difficulty| Cargo Doors / Landing Gear (A = open / down) | `C` |
 | Joystick, button | Hand controller           | arrows / WASD, `Space` or `Z` |
 
+On a gamepad: stick or D-pad, A/B/X/Y for the button, Start (hold) Activate
+Countdown, Back (hold) Status, left bumper Primary Engines, right bumper Cargo
+Doors / Gear, left trigger Backup Engines.
+
+The original flight manual is at the Internet Archive:
+<https://archive.org/details/Space_Shuttle_Journey_Into_Space_1983_Activision>.
+
 Flight 1 (hold Status until it reads FLT# 1, then Activate Countdown) flies the
 whole mission by itself. Holding Activate Countdown for about two seconds in
 flight goes back to the launch pad (the 1983 manual says Status). The page's
