@@ -1,7 +1,7 @@
 {
   "name": "Space Shuttle",
   "short_name": "Shuttle",
-  "description": "Steve Kitchen's Space Shuttle (Atari 2600, 1983), translated from the ROM.",
+  "description": "Jessica Stevens' Space Shuttle (Atari 2600, 1983), translated from the ROM.",
   "start_url": "./#play",
   "scope": "./",
   "display": "fullscreen",

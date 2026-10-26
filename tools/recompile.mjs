@@ -4,7 +4,8 @@
 // instruction occupies: tables and graphics). The instruction list is the
 // disassembler's (tools/build/code.json: executed or statically traced code);
 // instructions are decoded from the cartridge bytes; labels and comments come
-// from the assembled listing (tools/build/space_shuttle.lst).
+// from the assembled listing (tools/build/space_shuttle.lst: build space_shuttle.asm,
+// the annotated source, with tools/build-rom.ps1 space_shuttle.asm).
 //
 // Banks: bank 0 is assembled at $D000, bank 1 at $F000, but the cartridge
 // ignores address bit 13, so a bank's code can also run at the other origin
@@ -73,25 +74,29 @@ for (const b of [0, 1]) for (const [off, executed] of codeList.code[b]) {
 }
 
 // --- labels and comments from the listing (its addresses are file offsets) ---
-const labels = new Map(), comments = new Map(), notes = new Map();
+const labels = new Map(), comments = new Map(), notes = new Map(), sources = new Map();
 let pendingNotes = [];
 for (const line of listing) {
   const m = /^\s*\d+\s+([0-9a-f]{4})\s(.*)$/i.exec(line);
   if (!m) continue;
   const key = parseInt(m[1], 16);
-  const src = m[2].replace(/^\s*(?:[0-9a-f]{2} )+\s*/i, '').trim();
+  const src = m[2].replace(/^\s*(?:[0-9a-f]{2}[ \t]+)+/i, '').trim(); // (drop the listed bytes)
   const semi = src.indexOf(';');
   const code = (semi >= 0 ? src.slice(0, semi) : src).trim();
   const comment = semi >= 0 ? src.slice(semi + 1).replace(/\s+/g, ' ').trim() : '';
+  if (code.includes('=')) { pendingNotes = []; continue; } // an equate (the RAM and register names)
   const lab = /^([A-Za-z_][\w.]*):?(?:\s|$)/.exec(code);
   if (lab && !OPC_NAMES.has(lab[1].toLowerCase()) && !/^(processor|org|rorg|seg|include|\.byte|\.word)$/i.test(lab[1])) {
     if (!labels.has(key)) labels.set(key, []);
-    labels.get(key).push(lab[1]);
+    labels.get(key).push(lab[1] + (comment ? ` -- ${comment}` : ''));
     continue;
   }
   if (!code && comment) { pendingNotes.push(comment); continue; }
   if (instrs.has(key)) {
-    if (comment && !/^\$[0-9A-F]{4}( \(not executed in the coverage run\))?$/.test(comment)) comments.set(key, comment);
+    if (code && !code.startsWith('.byte')) sources.set(key, code.replace(/\s+/g, ' ')); // the instruction as the listing writes it (with its names)
+    // the listing's own comment, without the address and the coverage note
+    const text = comment.replace(/^\$[0-9A-F]{4}\s*/, '').replace(/^\(not executed in the coverage run\)\s*/, '');
+    if (text) comments.set(key, text);
     if (pendingNotes.length) notes.set(key, pendingNotes);
   }
   pendingNotes = [];
@@ -223,7 +228,7 @@ for (let i = 0; i < keys.length; i += 1) {
     if (touchesHotspot(ins) || !fall) line += ` pc = ${at(next)}; continue;`;
     if (!instrs.has((b << 12) | next)) line += ` /* next: data */`;
   }
-  out.push(`${line} // ${hex(ORIGIN[b] + off, 4)} ${src}${ins.executed ? '' : ' (traced, not executed)'}${comments.has(key) ? ' ; ' + comments.get(key) : ''}`);
+  out.push(`${line} // ${hex(ORIGIN[b] + off, 4)} ${sources.get(key) ?? src}${ins.executed ? '' : ' (traced, not executed)'}${comments.has(key) ? ' ; ' + comments.get(key) : ''}`);
 }
 out.push(`      default: throw new Error('no instruction at $' + pc.toString(16) + ' in bank ' + bus.bank);
     }

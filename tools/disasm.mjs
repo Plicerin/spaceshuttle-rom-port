@@ -6,7 +6,7 @@
 // $x000 enters the other bank at $x003 (each bank starts with BIT $FFF8 /
 // BIT $FFF9). Where one instruction hides another (BIT $xxxx skipping a 2-byte
 // instruction that another path enters), the hiding bytes become .byte.
-// usage: node tools/disasm.mjs  -> tools/build/space_shuttle_raw.asm, tools/build/code.json
+// usage: node tools/disasm.mjs  -> space_shuttle.asm (annotated), tools/build/space_shuttle_raw.asm, tools/build/code.json
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { loadRom } from './atari/vcs.mjs';
 
@@ -113,56 +113,117 @@ for (let b = 0; b < 2; b += 1) for (const [off, ins] of code[b]) {
   else if ((ins.mn === 'jmp' || ins.mn === 'jsr') && ins.mode === 'abs' && (ins.val & 0xfff) !== 0 && (ins.val >> 12) === ORIGIN[b] >> 12 && code[b].has(ins.val & 0xfff)) targets[b].add(ins.val & 0xfff);
 }
 
-// ---- source
-function operand(bank, off, ins) {
-  const v = ins.val;
-  switch (ins.mode) {
-    case 'imp': case 'acc': return [ins.mn, ''];
-    case 'imm': return [ins.mn, `#${hex(v, 2)}`];
-    case 'zp': return [ins.mn, hex(v, 2)];
-    case 'zpx': return [ins.mn, `${hex(v, 2)},x`];
-    case 'zpy': return [ins.mn, `${hex(v, 2)},y`];
-    case 'izx': return [ins.mn, `(${hex(v, 2)},x)`];
-    case 'izy': return [ins.mn, `(${hex(v, 2)}),y`];
-    case 'ind': return [ins.mn, `(${hex(v, 4)})`];
-    case 'rel': { const t = relTarget(off, ins); return [ins.mn, targets[bank].has(t) ? label(bank, t) : null]; }
-    default: {
-      const w = v < 0x100 ? '.w' : ''; // keep the absolute encoding of a zero-page address
-      const own = (ins.mn === 'jmp' || ins.mn === 'jsr') && (v >> 12) === ORIGIN[bank] >> 12 && targets[bank].has(v & 0xfff);
-      const idx = ins.mode === 'abx' ? ',x' : ins.mode === 'aby' ? ',y' : '';
-      return [ins.mn + w, (own ? label(bank, v & 0xfff) : hex(v, 4)) + idx];
+// ---- source: the raw listing (tools/build/space_shuttle_raw.asm) and the
+// annotated one (space_shuttle.asm), which names RAM, hardware registers,
+// routines and tables from tools/annotations.mjs. Names never change an
+// encoding: zero-page addresses used absolutely keep .w, and a ROM label is
+// used only for its exact address.
+const A = await import('./annotations.mjs');
+const WRITES = new Set(['sta', 'stx', 'sty', 'inc', 'dec', 'asl', 'lsr', 'rol', 'ror']);
+function emit(annotated) {
+  const name = (bank, off) => {
+    const addr = ORIGIN[bank] + off;
+    if (annotated && A.LABELS[addr]) return A.LABELS[addr][0];
+    if (annotated && A.DATA[addr]) return A.DATA[addr][0];
+    return label(bank, off);
+  };
+  const isLabelled = (bank, off) => targets[bank].has(off) || (annotated && !!(A.LABELS[ORIGIN[bank] + off] || A.DATA[ORIGIN[bank] + off]));
+  // a zero-page or hardware address as a name, where one fits
+  const symbol = (ins, v) => {
+    if (!annotated) return null;
+    if (v >= 0x80 && v <= 0xff && A.RAM[v]) return A.RAM[v][0];
+    if (v >= 0x280 && v <= 0x297 && A.RIOT[v]) return A.RIOT[v];
+    if (v < 0x40 && ins.mode !== 'zpx' && ins.mode !== 'zpy' && !ins.mode.startsWith('ab') && !ins.mode.startsWith('iz')) {
+      if (WRITES.has(ins.mn) && ins.mode !== 'acc' && A.TIA_WRITE[v]) return A.TIA_WRITE[v];
+      if (!WRITES.has(ins.mn) && A.TIA_READ[v]) return A.TIA_READ[v];
+    }
+    if (v < 0x40 && (ins.mode === 'zpx' || ins.mode === 'abx' || ins.mode === 'aby') && WRITES.has(ins.mn) && A.TIA_WRITE[v]) return A.TIA_WRITE[v]; // RESP0,x and the like
+    if (v < 0x40 && ins.mode === 'abs' && WRITES.has(ins.mn) && A.TIA_WRITE[v]) return A.TIA_WRITE[v];
+    if (v < 0x0e && ins.mode === 'abs' && !WRITES.has(ins.mn) && A.TIA_READ[v]) return A.TIA_READ[v];
+    return null;
+  };
+  const romName = (bank, v) => ((v >> 12) === ORIGIN[bank] >> 12 && annotated && (A.LABELS[v] || A.DATA[v]) ? name(bank, v & 0xfff) : null);
+  function operand(bank, off, ins) {
+    const v = ins.val;
+    const sym = (fallback) => symbol(ins, v) ?? fallback;
+    switch (ins.mode) {
+      case 'imp': case 'acc': return [ins.mn, ''];
+      case 'imm': return [ins.mn, `#${hex(v, 2)}`];
+      case 'zp': return [ins.mn, sym(hex(v, 2))];
+      case 'zpx': return [ins.mn, `${sym(hex(v, 2))},x`];
+      case 'zpy': return [ins.mn, `${sym(hex(v, 2))},y`];
+      case 'izx': return [ins.mn, `(${sym(hex(v, 2))},x)`];
+      case 'izy': return [ins.mn, `(${sym(hex(v, 2))}),y`];
+      case 'ind': return [ins.mn, `(${hex(v, 4)})`];
+      case 'rel': { const t = relTarget(off, ins); return [ins.mn, targets[bank].has(t) ? name(bank, t) : null]; }
+      default: {
+        const w = v < 0x100 ? '.w' : ''; // keep the absolute encoding of a zero-page address
+        const own = (ins.mn === 'jmp' || ins.mn === 'jsr') && (v >> 12) === ORIGIN[bank] >> 12 && targets[bank].has(v & 0xfff);
+        const idx = ins.mode === 'abx' ? ',x' : ins.mode === 'aby' ? ',y' : '';
+        return [ins.mn + w, (own ? name(bank, v & 0xfff) : romName(bank, v) ?? sym(hex(v, 4))) + idx];
+      }
     }
   }
-}
-const out = [
-  '; Space Shuttle: A Journey into Space (Activision, 1983), NTSC 8K F8',
-  '; raw disassembly by tools/disasm.mjs (reassembles byte-identically)',
-  '    processor 6502',
-];
-for (let b = 0; b < 2; b += 1) {
-  out.push('', `; ---------------------------------------------------------------- bank ${b}`, `    ORG ${hex(b * 0x1000, 4)}`, `    RORG ${hex(ORIGIN[b], 4)}`);
-  let data = [];
-  const flush = () => { for (let i = 0; i < data.length; i += 16) out.push(`    .byte ${data.slice(i, i + 16).map((v) => hex(v, 2)).join(',')}`); data = []; };
-  for (let off = 0; off < 0x1000;) {
-    const ins = code[b].get(off);
-    if (!ins) { data.push(byte(b, off)); off += 1; continue; }
+  const out = annotated ? [
+    '; Space Shuttle: A Journey into Space (Activision, 1983), NTSC 8K F8',
+    '; Annotated disassembly. Generated by tools/disasm.mjs from the coverage runs and',
+    '; tools/annotations.mjs; reassembles byte-identically (tools/build-rom.ps1).',
+    '; Names are given only where the code and the running cartridge agree; ram_XX and',
+    '; LXXXX are not yet understood, and "?" marks a comment that is a lead, not a fact.',
+    '    processor 6502',
+    '',
+    '; TIA (write)',
+    ...A.TIA_WRITE.map((n, i) => `${n.padEnd(12)}= ${hex(i, 2)}`),
+    '; TIA (read)',
+    ...A.TIA_READ.map((n, i) => `${n.padEnd(12)}= ${hex(i, 2)}`),
+    '; RIOT',
+    ...Object.entries(A.RIOT).map(([a, n]) => `${n.padEnd(12)}= ${hex(Number(a), 4)}`),
+    '',
+    '; RAM',
+    ...Object.entries(A.RAM).map(([a, [n, c]]) => `${n.padEnd(16)}= ${hex(Number(a), 2)}${c ? `    ; ${c}` : ''}`),
+  ] : [
+    '; Space Shuttle: A Journey into Space (Activision, 1983), NTSC 8K F8',
+    '; raw disassembly by tools/disasm.mjs (reassembles byte-identically)',
+    '    processor 6502',
+  ];
+  for (let b = 0; b < 2; b += 1) {
+    out.push('', `; ---------------------------------------------------------------- bank ${b}`, `    ORG ${hex(b * 0x1000, 4)}`, `    RORG ${hex(ORIGIN[b], 4)}`);
+    let data = [];
+    const flush = () => { for (let i = 0; i < data.length; i += 16) out.push(`    .byte ${data.slice(i, i + 16).map((v) => hex(v, 2)).join(',')}`); data = []; };
+    const head = (off) => {
+      const addr = ORIGIN[b] + off;
+      if (annotated && A.SECTIONS[addr]) { flush(); out.push('', ...A.SECTIONS[addr].map((t) => `; ---- ${t}`)); }
+      if (isLabelled(b, off)) {
+        flush();
+        const c = annotated ? (A.LABELS[addr] ?? A.DATA[addr])?.[1] : null;
+        out.push(`${name(b, off)}:${c ? `  ; ${c}` : ''}`);
+      }
+    };
+    for (let off = 0; off < 0x1000;) {
+      const ins = code[b].get(off);
+      if (!ins) { head(off); data.push(byte(b, off)); off += 1; continue; }
+      flush();
+      head(off);
+      const addr = ORIGIN[b] + off;
+      const note = annotated && A.COMMENTS[addr] ? `  ${A.COMMENTS[addr]}` : '';
+      const inner = [...Array(ins.len - 1).keys()].map((k) => off + 1 + k).find((o) => code[b].has(o));
+      if (inner !== undefined) {
+        out.push(`    .byte ${[...Array(inner - off).keys()].map((k) => hex(byte(b, off + k), 2)).join(',')}`.padEnd(30) + `; ${hex(addr, 4)} ${ins.mn}: skips the next instruction on this path${note}`);
+        off = inner;
+        continue;
+      }
+      const [mn, opd] = operand(b, off, ins);
+      if (opd === null) out.push(`    .byte ${[...Array(ins.len).keys()].map((k) => hex(byte(b, off + k), 2)).join(',')}`.padEnd(30) + `; ${hex(addr, 4)} ${ins.mn} into an instruction${note}`);
+      else out.push(`    ${mn}${opd ? ` ${opd}` : ''}`.padEnd(30) + `; ${hex(addr, 4)}${executed[b].has(off) ? '' : ' (not executed in the coverage run)'}${note}`);
+      off += ins.len;
+    }
     flush();
-    if (targets[b].has(off)) out.push(`${label(b, off)}:`);
-    const inner = [...Array(ins.len - 1).keys()].map((k) => off + 1 + k).find((o) => code[b].has(o));
-    if (inner !== undefined) {
-      out.push(`    .byte ${[...Array(inner - off).keys()].map((k) => hex(byte(b, off + k), 2)).join(',')}`.padEnd(30) + `; ${hex(ORIGIN[b] + off, 4)} ${ins.mn}: skips the next instruction on this path`);
-      off = inner;
-      continue;
-    }
-    const [mn, opd] = operand(b, off, ins);
-    if (opd === null) out.push(`    .byte ${[...Array(ins.len).keys()].map((k) => hex(byte(b, off + k), 2)).join(',')}`.padEnd(30) + `; ${hex(ORIGIN[b] + off, 4)} ${ins.mn} into an instruction`);
-    else out.push(`    ${mn}${opd ? ` ${opd}` : ''}`.padEnd(30) + `; ${hex(ORIGIN[b] + off, 4)}${executed[b].has(off) ? '' : ' (not executed in the coverage run)'}`);
-    off += ins.len;
   }
-  flush();
+  return out.join('\n') + '\n';
 }
 mkdirSync('tools/build', { recursive: true });
-writeFileSync('tools/build/space_shuttle_raw.asm', out.join('\n') + '\n');
+writeFileSync('tools/build/space_shuttle_raw.asm', emit(false));
+writeFileSync('space_shuttle.asm', emit(true));
 // the instruction list for tools/recompile.mjs: per bank, [offset, executed in the coverage run]
 writeFileSync('tools/build/code.json', JSON.stringify({ code: [0, 1].map((b) => [...code[b].keys()].sort((x, y) => x - y).map((o) => [o, executed[b].has(o) ? 1 : 0])), data: cov.data }));
 const n = (b) => [...code[b].values()].reduce((s, i) => s + i.len, 0);
