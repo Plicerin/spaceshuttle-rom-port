@@ -34,12 +34,16 @@ export function mountPlayer(root) {
   const playButton = root.querySelector('[data-play]');
   const poster = root.querySelector('[data-poster]');
   const hint = root.querySelector('[data-hint]');
-  const muteButton = root.querySelector('[data-mute]');
-  const pauseButton = root.querySelector('[data-pause]');
+  const note = root.querySelector('[data-note]');
+  const muteButtons = root.querySelectorAll('[data-mute]');
+  const pauseButtons = root.querySelectorAll('[data-pause]');
   const volumeSlider = root.querySelector('[data-volume]');
 
   const game = new ShuttleMachine();
   const held = new Set();
+  // a key or button released before the next frame still counts for that frame
+  const tapped = new Set();
+  const touch = matchMedia('(pointer: coarse)').matches;
   const audio = createTiaAudio(new URL('./tiaSound.worklet.js', import.meta.url).href);
   const screen = document.createElement('canvas');
   screen.width = 160;
@@ -52,13 +56,34 @@ export function mountPlayer(root) {
   // countdown waits for all three)
   const toggles = { primary: false, backup: false, doors: false };
   const down = { status: false, countdown: false };
-  let last = 0, acc = 0, pad = null;
+  let last = 0, acc = 0, pad = null, frames = 0;
 
-  const setHint = (text) => { if (hint) hint.textContent = text; };
+  const setHint = (text) => { if (hint && hint.textContent !== text) hint.textContent = text; };
+  // the hint follows the flight: the cartridge's flight number ($A0), whether
+  // a flight is under way ($B6) and its phase ($B5: 0 pad, 1 ascent, 2 orbit, 3 entry, 4 landing)
+  const status = touch ? 'Status' : 'Status (X)', countdown = touch ? 'Activate Countdown' : 'Activate Countdown (Enter)';
+  function phaseHint() {
+    const ram = game.bus.ram, flight = ram[0xa0 & 0x7f], phase = ram[0xb5 & 0x7f];
+    if (!ram[0xb6 & 0x7f]) return `Hold ${status} to pick a flight (1 flies itself). Engines shut down, doors closed, then hold ${countdown}.`;
+    if (flight === 1) return 'Flight 1 flies itself: touch the hand controller to take over.';
+    return [
+      'Primary Engines on at MET-015. Hold the button the moment MET-004 appears.',
+      'Keep T on C with taps, follow the trajectory, keep the plane centred. Engines off at about 205 miles.',
+      'Orbit: engines on, pitch -28, engines off, doors open. Dock: Z, Y, then X to 0. Deorbit once X reaches 128.',
+      'Reentry: pitch +24, engines off, doors closed. Follow the course on the computer screen.',
+      'Landing: turn right to line up, keep steering. Gear down when range goes negative, then hold forward.',
+    ][phase] ?? '';
+  }
+  function showNote() {
+    if (!note) return;
+    const text = paused ? 'PAUSED' : started && !touch && document.activeElement !== canvas ? 'Click the screen to use the keyboard' : '';
+    note.textContent = text;
+    note.hidden = !text;
+  }
   const silence = () => audio.setSilent(muted || paused || !started);
 
   function step() {
-    const on = (control) => held.has(control) || !!pad?.[control];
+    const on = (control) => held.has(control) || tapped.has(control) || !!down[control] || !!pad?.[control];
     let swcha = 0xff;
     if (on('right')) swcha &= ~0x80;
     if (on('left')) swcha &= ~0x40;
@@ -67,10 +92,13 @@ export function mountPlayer(root) {
     game.bus.swcha = swcha;
     game.bus.inpt4 = on('fire') ? 0x00 : 0x80;
     // SWCHB: bit 0 Reset, bit 1 Select (low = pressed), bit 3 Color, bit 6 left difficulty A, bit 7 right A
-    game.bus.swchb = (down.countdown ? 0 : 0x01) | (down.status ? 0 : 0x02)
+    game.bus.swchb = (on('countdown') ? 0 : 0x01) | (on('status') ? 0 : 0x02)
       | (toggles.primary ? 0x08 : 0) | (toggles.backup ? 0x40 : 0) | (toggles.doors ? 0x80 : 0);
     game.runFrame();
+    tapped.clear();
     audio.update(game.bus.audio);
+    frames += 1;
+    if (started && frames % 30 === 0) setHint(phaseHint());
   }
 
   function draw() {
@@ -110,23 +138,25 @@ export function mountPlayer(root) {
     started = true;
     if (poster) poster.hidden = true;
     canvas.focus({ preventScroll: true });
-    setHint('Hold Status (X) to pick a flight: 1 flies itself. With engines shut down and the doors closed, hold Activate Countdown (Enter). E, B and C flip the engine and door switches.');
+    setHint(phaseHint());
+    showNote();
     await audio.start();
     silence();
   }
 
   function togglePause() {
     paused = !paused;
-    if (pauseButton) pauseButton.textContent = paused ? 'Resume' : 'Pause';
+    pauseButtons.forEach((b) => { b.textContent = paused ? 'Resume' : 'Pause'; });
+    showNote();
     silence();
   }
 
   function toggleMute() {
     muted = !muted;
-    if (muteButton) {
-      muteButton.textContent = muted ? 'Sound on' : 'Mute';
-      muteButton.setAttribute('aria-pressed', String(muted));
-    }
+    muteButtons.forEach((b) => {
+      b.textContent = muted ? 'Sound on' : 'Mute';
+      b.setAttribute('aria-pressed', String(muted));
+    });
     silence();
   }
 
@@ -146,7 +176,7 @@ export function mountPlayer(root) {
   }
   root.querySelectorAll('[data-press]').forEach((button) => {
     const name = button.dataset.press;
-    const press = (event) => { event.preventDefault(); if (!started) play(); down[name] = true; try { button.setPointerCapture(event.pointerId); } catch { /* fine */ } };
+    const press = (event) => { event.preventDefault(); if (!started) play(); down[name] = true; tapped.add(name); try { button.setPointerCapture(event.pointerId); } catch { /* fine */ } };
     const release = () => { down[name] = false; };
     button.addEventListener('pointerdown', press);
     for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(ev, release);
@@ -161,14 +191,14 @@ export function mountPlayer(root) {
   volumeSlider?.addEventListener('input', () => setVolume(Number(volumeSlider.value)));
 
   playButton?.addEventListener('click', play);
-  pauseButton?.addEventListener('click', () => { if (started) togglePause(); });
-  muteButton?.addEventListener('click', toggleMute);
+  pauseButtons.forEach((b) => b.addEventListener('click', () => { if (started) togglePause(); }));
+  muteButtons.forEach((b) => b.addEventListener('click', toggleMute));
 
   canvas.addEventListener('keydown', (event) => {
     const control = KEYS[event.code];
-    if (control) { event.preventDefault(); held.add(control); }
-    if (event.code === 'Enter') { event.preventDefault(); if (!started) play(); down.countdown = true; }
-    if (event.code === 'KeyX') down.status = true;
+    if (control) { event.preventDefault(); held.add(control); tapped.add(control); }
+    if (event.code === 'Enter') { event.preventDefault(); if (!started) play(); down.countdown = true; tapped.add('countdown'); }
+    if (event.code === 'KeyX') { down.status = true; tapped.add('status'); }
     for (const [name, t] of Object.entries(TOGGLES)) if (event.code === t.key && !event.repeat) flip(name);
     if (event.code === 'KeyP') togglePause();
     if (event.code === 'KeyM') toggleMute();
@@ -179,7 +209,8 @@ export function mountPlayer(root) {
     if (event.code === 'Enter') down.countdown = false;
     if (event.code === 'KeyX') down.status = false;
   });
-  canvas.addEventListener('blur', () => { held.clear(); down.status = down.countdown = false; });
+  canvas.addEventListener('blur', () => { held.clear(); down.status = down.countdown = false; showNote(); });
+  canvas.addEventListener('focus', showNote);
   canvas.addEventListener('pointerdown', () => { if (!started) play(); });
 
   // touch controls: hold to press

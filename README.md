@@ -21,10 +21,12 @@ Every console switch is a cockpit control; the page has buttons for them.
 | Color/B&W      | Primary Engines (Color = on)| `E`        |
 | Left difficulty| Backup Engines (A = on)     | `B`        |
 | Right difficulty| Cargo Doors / Landing Gear (A = open / down) | `C` |
-| Joystick, button | Hand controller           | arrows / WASD, `Space` |
+| Joystick, button | Hand controller           | arrows / WASD, `Space` or `Z` |
 
 Flight 1 (hold Status until it reads FLT# 1, then Activate Countdown) flies the
-whole mission by itself.
+whole mission by itself. Holding Activate Countdown for about two seconds in
+flight goes back to the launch pad (the 1983 manual says Status). The page's
+"How to fly" has the checklists for every stage.
 
 ## How it was made
 
@@ -49,9 +51,12 @@ There was no published disassembly, so the cartridge was disassembled from scrat
    from the autopilot late in the mission (env `TAKEOVER`); and a scripted
    pilot for flights 2 and 3 (env `FLIGHT`, `ASCENT`, `DUTY`) that follows the
    manual's launch sequence by reading the flight number ($A0) and the mission
-   clock ($9C) from RAM. 340,000 frames: no differences.
-   `tools/verified-coverage.mjs` combines the runs: 2,921 of the 3,002
-   instructions (97%) were executed in the comparisons. `tools/cov-pilot.mjs`
+   clock ($9C) from RAM. Recorded flights in `tools/replays/` (mode `replay`,
+   env `REPLAY`): a careful pilot's whole flight 3, from launch through a
+   docking, the deorbit burn and reentry to the landing, flown with the stick,
+   button and switches only; and a restart in flight. 381,000 frames: no
+   differences. `tools/verified-coverage.mjs` combines the runs: 2,962 of the
+   3,002 instructions (98.7%) were executed in the comparisons. `tools/cov-pilot.mjs`
    is the same pilot for the coverage runs.
 
 `tools/gen-images.mjs` renders the site's pictures from the translation.

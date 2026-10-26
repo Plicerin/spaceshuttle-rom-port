@@ -13,17 +13,22 @@
 // ('pilot'): tools/cov-pilot.mjs's scripted launch (env FLIGHT 2|3, ASCENT
 // frames of steady climb, DUTY of the button), then random piloting with
 // engine and door switch moves; it reads the flight number and the clock
-// from the cartridge's RAM.
-// usage: node tools/verify-recomp.mjs [frames] [seed] [auto|random|pilot]
+// from the cartridge's RAM. ('replay', env REPLAY=file): recorded input from
+// tools/replays/, runs of [frames, SWCHA, INPT4, SWCHB]: flight3-mission.json
+// is a careful pilot's whole flight 3 (launch, docking, deorbit, reentry,
+// landing; stick, button and switches only), restart.json a restart in flight.
+// usage: node tools/verify-recomp.mjs [frames] [seed] [auto|random|pilot|replay]
 import { VCS, loadRom } from './atari/vcs.mjs';
 import { ShuttleMachine } from '../src/shuttleMachine.mjs';
 import { ROM_DATA } from '../src/shuttleRomData.mjs';
 
-const frames = Number(process.argv[2] ?? 3000), seed = Number(process.argv[3] ?? 1), mode = process.argv[4] ?? 'random';
+const mode = process.argv[4] ?? 'random', seed = Number(process.argv[3] ?? 1);
+const replay = mode === 'replay' ? JSON.parse(readFileSync(process.env.REPLAY, 'utf8')).flatMap(([n, ...input]) => Array(n).fill(input)) : null;
+const frames = replay ? replay.length : Number(process.argv[2] ?? 3000);
 const rom = new VCS(loadRom());
 // every instruction the cartridge executes during the comparison (bank << 12 | offset), saved to
 // tools/out/verified-<mode>-<seed>.json so tools/verified-coverage.mjs can combine the runs
-import { writeFileSync as saveFile } from 'node:fs';
+import { writeFileSync as saveFile, readFileSync } from 'node:fs';
 const ran = new Set();
 const romStep = rom.cpu.step.bind(rom.cpu);
 rom.cpu.step = () => { ran.add((rom.bank << 12) | (rom.cpu.pc & 0xfff)); return romStep(); };
@@ -77,7 +82,9 @@ function pilot() {
 }
 for (let f = 0; f < frames; f += 1) {
   let swchb = held;
-  if (mode === 'pilot') {
+  if (replay) {
+    [stick, fire, swchb] = replay[f];
+  } else if (mode === 'pilot') {
     ({ stick, fire, swchb } = pilot());
   } else if (mode === 'auto' && process.env.TAKEOVER && f >= Number(process.env.TAKEOVER)) {
     // the autosimulator flew up to here; touching the joystick hands over the controls
@@ -117,7 +124,7 @@ for (let f = 0; f < frames; f += 1) {
   if (pr && pr.some((row, y) => row.some((c, x) => c !== pj[y][x]))) diffs.push('picture differs');
   if (diffs.length) { bad += 1; if (bad <= 5) console.log(`frame ${f}: ${diffs.slice(0, 8).join(', ')}`); if (bad === 5) break; }
 }
-saveFile(`tools/out/verified-${mode}${mode === 'pilot' ? `-${FLIGHT_WANTED}-${ASCENT}-${DUTY}` : ''}${process.env.TAKEOVER ? `-t${process.env.TAKEOVER}` : ''}-${seed}.json`, JSON.stringify([...ran]));
+saveFile(`tools/out/verified-${mode}${mode === 'pilot' ? `-${FLIGHT_WANTED}-${ASCENT}-${DUTY}` : ''}${process.env.TAKEOVER ? `-t${process.env.TAKEOVER}` : ''}${replay ? `-${process.env.REPLAY.replace(/.*[\\/]|\.json$/g, '')}` : ''}-${seed}.json`, JSON.stringify([...ran]));
 if (unmapped.size) console.log('reads outside the data image:', [...unmapped].slice(0, 20).join(', '));
 console.log({ frames, mode, seed, ...(mode === 'pilot' ? { flight: FLIGHT_WANTED, ascent: ASCENT, duty: DUTY } : {}), bad, unmapped: unmapped.size });
 process.exit(bad || unmapped.size ? 1 : 0);

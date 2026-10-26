@@ -2,8 +2,8 @@
 // manual's launch sequence, reading the flight number ($A0) and the mission
 // clock ($9C, BCD seconds, counting down to launch) from RAM: every switch
 // off, Status held until the flight comes up, Activate Countdown, Primary
-// Engines on once the clock counts (MET-014; on during the hold at
-// 015 scrubs the launch), the button held from MET-004 (thrust, pulsed with
+// Engines on once the clock counts (MET-014; on before the pre-flight
+// checks finish holds the countdown), the button held from MET-004 (thrust, pulsed with
 // `duty`). After lift-off it pilots at random (stick, button bursts, now and
 // then the engine and door switches) for `frames` frames. Every executed
 // instruction and ROM data read is added to tools/out/coverage.json.
@@ -49,7 +49,7 @@ for (let i = 0; i < 10; i += 1) frame({ reset: true });
 let launched = false;
 for (let i = 0; i < 3000 && !launched; i += 1) {
   const met = ram(MET);
-  if (met <= 0x14) sw.primary = true; // once the clock is counting (on during the hold at 15 scrubs the launch)
+  if (met <= 0x14) sw.primary = true; // once the clock is counting (on during the checks holds the countdown)
   const fire = met <= 0x04 && (duty >= 1 || rnd(100) < duty * 100);
   frame({ fire });
   if (met === 0 && i > 60) launched = true;

@@ -86,7 +86,7 @@ computerScreen  = $84    ; what the green computer screen shows: $D9A3 picks 1 (
 statusPage      = $85    ; the status line page: odd values 1 SP, 3 ALT, 5 FUEL, 7 MET, 9 STAT, $0B FLT#, $0D X-AXIS, $0F Y-AXIS, $11 Z-AXIS, $13 PITCH, $15 YAW, $17 RNG, $19 NASA, $1B MISSION ABORT, $1D LAUNCH SCRUB, $1F RENDEZVOUS. A readout shows the three BCD bytes ending at $96 + page
 cloud0X         = $86    ; x of the first cloud (pad and ascent window scene)
 cloud1X         = $87    ; x of the second cloud
-pitch           = $88    ; PITCH (status page $13 shows pitch*4-$1B); docking needs 0
+pitch           = $88    ; PITCH (status page $13 shows pitch*4-$1C: the ASLs leave carry clear, so SBC #$1B takes $1C; 0 = -28, 6 = -004, 13 = +24); docking needs 0
 starRow         = $89    ; star field scroll position ($0E-$14) for the $8A-$95 table
 starX           = $8A    ; x positions of 12 stars, $8A-$95 (rotated and shifted by the RCS motion flags $AB)
 speedLo         = $96    ; SP readout, BCD, tenths of mach (low byte)
