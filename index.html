@@ -109,6 +109,7 @@
     }
     @media (pointer: coarse) { body.fs .deck .con { display: none; } }
     @media (pointer: coarse) and (orientation: portrait) {
+      body.fs #status-line { min-height: calc(4 * 1.9em); }
       body.fs .tv { width: min(100%, calc((100dvh - 420px) * 640 / 392)); }
       body.fs .deck { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
@@ -116,7 +117,7 @@
       body.fs .tv { width: min(calc(100% - 330px), calc((100dvh - 160px) * 640 / 392)); }
       body.fs .deck { width: min(calc(100% - 320px), 760px); gap: 4px; }
       body.fs .deck button { font-size: 11px; }
-      body.fs #status-line { position: absolute; z-index: 12; top: max(6px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: 270px; margin: 0; font-size: 9px; letter-spacing: 0; line-height: 1.35; text-align: left; }
+      body.fs #status-line { position: absolute; z-index: 12; top: max(6px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: 270px; margin: 0; font-size: 10px; letter-spacing: 0; line-height: 1.3; text-align: left; }
       body.fs #tc { pointer-events: none; top: 0; align-items: center; }
       body.fs #tc button { pointer-events: auto; opacity: 0.8; }
       body.fs .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 40px); }
@@ -170,6 +171,9 @@
     ul.lp-keys li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; }
     ul.lp-keys li:first-child { border-top: 0; }
     ul.lp-keys li > span:last-child { text-align: right; flex: 0 0 auto; }
+    ul.lp-gloss li { justify-content: flex-start; }
+    ul.lp-gloss li > span:first-child { flex: 0 0 6.5em; }
+    ul.lp-gloss li > span:last-child { flex: 1 1 auto; text-align: left; }
     .lp-aside { margin-top: 18px; padding: 14px 16px; border-left: 3px solid var(--lp-accent); background: rgba(84, 92, 214, 0.08); border-radius: 0 10px 10px 0; font-size: 13.5px; line-height: 1.6; }
     .lp-aside b { color: var(--lp-ink); }
     .lp-aside ul { margin: 8px 0 0 18px; }
@@ -332,7 +336,7 @@
         <ol class="lp-steps">
           <li><b>Z</b> (altitude): hold the button and tap forward to dive, back to climb, until Z-AXIS reads 0 (altitude 210).</li>
           <li><b>Y</b>: tap right when it is positive, left when negative.</li>
-          <li><b>X</b>: read it with Status. When it is negative, tap forward to fly faster than 23.9; when positive, tap back to fly slower. Go about 0.1 faster (or slower) for every 4 of X, up to 1.6 away from 23.9 (25.5 when X is negative), and ease back toward 23.9 as X shrinks. One tap's difference takes many minutes and a lot of fuel.</li>
+          <li><b>X</b>: read it with Status. When it is negative, tap forward to fly faster than 23.9; when positive, tap back to fly slower. Go about 0.1 faster (or slower) for every 4 of X, up to 1.6 away from 23.9 (25.5 when X is negative), and ease back toward 23.9 as X shrinks, but <b>stay at least one tap off 23.9 until X reads 0</b>: at 23.9 exactly, X stops closing. One tap's difference takes many minutes and a lot of fuel.</li>
           <li>Hold all three at 0 for two seconds.</li>
         </ol>
         <p>Tap, don't hold: each tap acts at once, and every move costs fuel. Each docking earns fuel; each one after it is harder.</p>
@@ -362,7 +366,7 @@
         <h3>Landing</h3>
         <ol class="lp-steps">
           <li>When the mountains appear, turn right to line up with the runway, and keep steering: a crosswind keeps pushing you off.</li>
-          <li>On the left screen, keep the dot on the S-F curve: push forward when it is above the curve (lowers the nose, descends faster), pull back when it is below. On the right screen, steer left and right to keep the dot on the dotted runway line.</li>
+          <li>On the left screen, keep the dot on the S-F curve: push forward when it is above the curve (lowers the nose, descends faster), pull back when it is below. On the right screen, <b>steer toward the dot</b> to bring it back to the dotted runway line: dot right of the line, steer right.</li>
           <li>The button shows altitude instead of range. When range goes negative you are over the runway: Landing Gear down (the door switch).</li>
           <li>After touchdown the nose pops up: hold forward until the front gear comes down.</li>
         </ol>
@@ -371,6 +375,26 @@
         <h3>Starting over</h3>
         <p>Hold Activate Countdown for about two seconds during a flight to go back to the launch pad. (The 1983 manual says Status; the cartridge reads Game Reset.) Then shut the engines down and close the doors, or the new countdown's checks end on a hold.</p>
         <p>The <a href="https://archive.org/details/Space_Shuttle_Journey_Into_Space_1983_Activision">original flight manual</a> (at the Internet Archive) explains every readout and every stat message; this is the short version.</p>
+      </div>
+      <div class="lp-card">
+        <h3>Reading the instruments</h3>
+        <ul class="lp-keys lp-gloss">
+          <li><span><b>MET</b></span><span>mission elapsed time: counts down to launch, then up</span></li>
+          <li><span><b>T</b> and <b>C</b></span><span>your thrust, and the thrust the computer wants</span></li>
+          <li><span><b>MECO</b></span><span>main engine cut-off: engines off at about 205 miles</span></li>
+          <li><span><b>SP</b> · <b>ALT</b></span><span>speed in mach · altitude in nautical miles</span></li>
+          <li><span><b>X / Y / Z-AXIS</b></span><span>where the satellite is: ahead or behind, left or right, above or below</span></li>
+          <li><span><b>PITCH</b> · <b>YAW</b></span><span>nose up or down · nose left or right</span></li>
+          <li><span><b>RNG</b></span><span>range to the runway</span></li>
+          <li><span><b>S-F</b></span><span>the safe glide path on the landing screen</span></li>
+          <li><span><b>STAT</b></span><span>status: 0 all clear, else a message number</span></li>
+        </ul>
+        <p style="margin-top: 10px">Hold Status to page through the readouts.</p>
+      </div>
+      <div class="lp-card">
+        <h3>Stat messages</h3>
+        <p><b>Before launch</b> (the countdown holds): 4 Primary Engines on, 20 Backup Engines on, 40 Cargo Doors open; they add up, so 44 is engines and doors.</p>
+        <p><b>Mission aborts</b> (flights 2 and 3): 1000 not lined up with the runway, 1500 touched down too early, 2000 too late, 3000 nose gear not down, 3500 off course at the banking turn, 4000 gear not down, 5000 doors not closed at ascent or entry, 5500/6000 pitch wrong at entry, 6500 yaw not 0 at entry, 7000 too low for orbit, 7500 too high, 8000 too slow for orbit, 8500 doors not opened in orbit, 9000 wrong plane at engine cut-off, 9500 too low or slow at cut-off, 9900 out of fuel. The last digits count your dockings.</p>
       </div>
     </div>
   </section>

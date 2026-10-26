@@ -71,24 +71,41 @@ export function mountPlayer(root) {
     if (pad) return what === 'status' ? 'Status (Back)' : 'Activate Countdown (Start)';
     return what === 'status' ? 'Status (X)' : 'Activate Countdown (Enter)';
   };
+  // the manual's in-flight abort messages, by the STAT readout's first two digits ($9F)
+  const ABORTS = {
+    0x10: 'not lined up with the runway at touchdown', 0x15: 'touched down too early, in the desert',
+    0x20: 'touched down too late, off the end of the runway', 0x30: 'nose gear not down by the end of the runway',
+    0x35: 'off course at the banking turn', 0x40: 'landing gear not down at touchdown',
+    0x50: 'cargo doors not closed at ascent or entry', 0x55: 'pitch wrong at entry: skipped off into space',
+    0x60: 'pitch wrong at entry: burned up', 0x65: 'yaw not 0 at entry', 0x70: 'too low to stay in orbit',
+    0x75: 'too high (255 miles is the limit)', 0x80: 'too slow to stay in orbit', 0x85: 'cargo doors not opened in orbit: overheated',
+    0x90: 'wrong plane at engine shutdown', 0x95: 'too low or too slow at engine shutdown', 0x99: 'out of fuel',
+  };
   function phaseHint() {
     const ram = game.bus.ram, at = (a) => ram[a & 0x7f];
     const phase = at(0xb5), abort = at(0x9f);
     const pick = `Hold ${name('status')} to pick a flight (1 flies itself). Engines shut down, doors closed, then press ${name('countdown')}.`;
     if (!at(0xb6)) {
-      if (abort) return `Mission aborted: stat message ${abort.toString(16)} in the manual. ${pick}`;
+      if (abort && at(0xa0) === 1 && at(0xf7) !== 0xff) return `The demonstration flight ends here. ${pick}`;
+      if (abort) return `Mission aborted, STAT ${abort.toString(16)}00: ${ABORTS[abort] ?? 'see the stat messages in the manual'}. ${pick}`;
       if (phase === 4) return `Landed. ${pick}`;
-      if (at(0xae)) return 'Pre-flight checks running (about ten seconds): leave the engines shut down. The clock then counts down from MET-015.';
+      // a held countdown shows the prelaunch STAT ($9E): 4 Primary Engines, 20 Backup, 40 Cargo Doors
+      const held = at(0x9e);
+      if (at(0xae) && held) {
+        const fix = [held & 0x0f && 'shut down the Primary Engines', held & 0x20 && 'shut down the Backup Engines', held & 0x40 && 'close the Cargo Doors'].filter(Boolean).join(', ');
+        return `Countdown held (STAT ${held.toString(16)}): ${fix}. It carries on by itself.`;
+      }
+      if (at(0xae)) return 'Pre-flight checks running (about ten seconds): engines shut down and doors closed when they finish, or the countdown holds. The clock then counts down from MET-015.';
       return pick;
     }
     if (at(0xa0) === 1 && at(0xf7) !== 0xff) return 'Flight 1 flies itself: touch the hand controller to take over.';
-    if (phase === 2 && at(0xa6) < 200) return 'Set up for reentry now, before you drop out of orbit: yaw back to 0, pull back to pitch +24, engines off, doors closed.';
+    if (phase === 2 && at(0xa6) <= 190) return 'Set up for reentry now, before you drop out of orbit: yaw back to 0, pull back to pitch +24, engines off, doors closed.';
     return [
       'Primary Engines on at MET-015. Hold the button the moment MET-004 appears.',
       'Keep T on C with taps, follow the trajectory, keep the plane centred. Engines off at about 205 miles.',
       'Orbit: engines on, pitch -28, engines off, doors open. Dock: Z, Y, then X to 0. Deorbit once X reaches 128.',
       'Reentry: pitch +24, engines off, doors closed. Follow the course on the computer screen.',
-      'Landing: turn right to line up, keep steering. Left dot on the S-F curve, right dot on the runway line. Gear down when range goes negative, then hold forward.',
+      'Landing: turn right to line up. Left dot on the S-F curve; steer toward the right dot to bring it to the runway line. Gear down when range goes negative, then hold forward.',
     ][phase] ?? '';
   }
   function showNote() {
@@ -221,7 +238,8 @@ export function mountPlayer(root) {
   }
   setVolume(Number(store.get('shuttle-volume') ?? 70));
   volumeSlider?.addEventListener('input', () => setVolume(Number(volumeSlider.value)));
-  volumeSlider?.addEventListener('change', () => refocus());
+  // after a drag or click with the mouse; the keyboard keeps the slider for its arrows
+  volumeSlider?.addEventListener('pointerup', () => refocus());
 
   playButton?.addEventListener('click', play);
   // the tray controls hand the keys back to the game, or Space would press them again
