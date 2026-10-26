@@ -306,14 +306,14 @@
         <h3>Launch, step by step</h3>
         <ol class="lp-steps">
           <li>Primary and Backup Engines shut down, cargo doors closed: the countdown won't start otherwise.</li>
-          <li>Hold Activate Countdown. The computers run their checks for about ten seconds; switching an engine on now holds the countdown until you shut it down again.</li>
+          <li>Press Activate Countdown (a tap will do, then let go: holding it once the clock runs sends you back to the pad). The computers run their checks for about ten seconds; an engine left on when they finish holds the countdown until you shut it down.</li>
           <li>When the clock shows MET&minus;015, Primary Engines on.</li>
           <li>The engines light themselves at MET&minus;004. <b>The moment 004 appears</b> (within about half a second), hold the button: it raises the thrust arrow T toward the computer's arrow C, and T has to be high by MET 0. Pressing before 004 scrubs the launch.</li>
           <li>After lift-off, keep T on C with taps: the button moves T toward C, and holding it overshoots.</li>
           <li>Follow the trajectory on the tracking screen: forward moves the dot left, back moves it right. Left and right keep your plane centred in the small box; any plane error left at engine shutdown is magnified sixteen times in orbit, which makes docking much harder.</li>
           <li>Primary Engines off at about 205 nautical miles.</li>
         </ol>
-        <p style="margin-top: 10px">A scrub resets the clock: hold Activate Countdown to try again.</p>
+        <p style="margin-top: 10px">After a scrub the count restarts by itself from 016: leave the engines on and hold the button the moment 004 appears.</p>
       </div>
     </div>
     <div class="lp-grid" style="margin-top: 14px">
@@ -330,9 +330,9 @@
         <h3>Docking</h3>
         <p>The satellite flies at mach 23.9, 210 miles up. Keep pitch at &minus;28 and yaw at 0, or you won't see it. Then zero the axes in this order:</p>
         <ol class="lp-steps">
-          <li><b>Z</b> (altitude): hold the button and tap forward to dive, back to climb, until you are at 210.</li>
+          <li><b>Z</b> (altitude): hold the button and tap forward to dive, back to climb, until Z-AXIS reads 0 (altitude 210).</li>
           <li><b>Y</b>: tap right when it is positive, left when negative.</li>
-          <li><b>X</b>: read it with Status. When it is negative, tap forward to fly faster than 23.9; when positive, tap back to fly slower. Return to 23.9 as X reaches 0.</li>
+          <li><b>X</b>: read it with Status. When it is negative, tap forward to fly faster than 23.9; when positive, tap back to fly slower. Go about 0.1 faster (or slower) for every 4 of X, up to 1.6 away from 23.9 (25.5 when X is negative), and ease back toward 23.9 as X shrinks. One tap's difference takes many minutes and a lot of fuel.</li>
           <li>Hold all three at 0 for two seconds.</li>
         </ol>
         <p>Tap, don't hold: each tap acts at once, and every move costs fuel. Each docking earns fuel; each one after it is harder.</p>
@@ -341,10 +341,10 @@
         <h3>Deorbit burn</h3>
         <ol class="lp-steps">
           <li>Wait for the satellite to drift to X = 128 (+ or &minus;), or the burn won't take you out of orbit.</li>
-          <li>Speed back to 23.9 and Z to 0.</li>
+          <li>Speed back to 23.9 and Z-AXIS to 0.</li>
           <li>Primary Engines on.</li>
           <li>Push left until yaw reads &minus;128: you are flying tail-first.</li>
-          <li>Pitch to &minus;004.</li>
+          <li>Pull back until pitch reads &minus;004.</li>
           <li>Hold the button until speed reads 19.0.</li>
           <li>Push right until yaw is <b>exactly 0</b>.</li>
         </ol>
@@ -353,7 +353,8 @@
         <h3>Reentry</h3>
         <ol class="lp-steps">
           <li>Pull back until pitch reads <b>+24</b>, exactly.</li>
-          <li>Primary Engines off, <b>Cargo Doors closed</b>. Doors left open, or any other pitch, aborts the mission.</li>
+          <li>Primary Engines off, <b>Cargo Doors closed</b>.</li>
+          <li>Do all this <b>straight after the burn</b>: the computers check pitch, engines and doors the moment you drop out of orbit, about half a minute later. Doors open, engines on or any other pitch aborts the mission.</li>
           <li>Follow the course on the computer screen: back goes right, forward goes left, left and right centre the plane.</li>
         </ol>
       </div>
@@ -361,14 +362,14 @@
         <h3>Landing</h3>
         <ol class="lp-steps">
           <li>When the mountains appear, turn right to line up with the runway, and keep steering: a crosswind keeps pushing you off.</li>
-          <li>Keep both dots centred: forward lowers the nose (descend faster), back raises it.</li>
+          <li>On the left screen, keep the dot on the S-F curve: push forward when it is above the curve (lowers the nose, descends faster), pull back when it is below. On the right screen, steer left and right to keep the dot on the dotted runway line.</li>
           <li>The button shows altitude instead of range. When range goes negative you are over the runway: Landing Gear down (the door switch).</li>
           <li>After touchdown the nose pops up: hold forward until the front gear comes down.</li>
         </ol>
       </div>
       <div class="lp-card">
         <h3>Starting over</h3>
-        <p>Hold Activate Countdown for about two seconds during a flight to go back to the launch pad. (The 1983 manual says Status; the cartridge reads Game Reset.)</p>
+        <p>Hold Activate Countdown for about two seconds during a flight to go back to the launch pad. (The 1983 manual says Status; the cartridge reads Game Reset.) Then shut the engines down and close the doors, or the new countdown's checks end on a hold.</p>
         <p>The <a href="https://archive.org/details/Space_Shuttle_Journey_Into_Space_1983_Activision">original flight manual</a> (at the Internet Archive) explains every readout and every stat message; this is the short version.</p>
       </div>
     </div>

@@ -62,18 +62,33 @@ export function mountPlayer(root) {
 
   const setHint = (text) => { if (hint && hint.textContent !== text) hint.textContent = text; };
   // the hint follows the flight: the cartridge's flight number ($A0), whether
-  // a flight is under way ($B6) and its phase ($B5: 0 pad, 1 ascent, 2 orbit, 3 entry, 4 landing)
-  const status = touch ? 'Status' : 'Status (X)', countdown = touch ? 'Activate Countdown' : 'Activate Countdown (Enter)';
+  // a flight is under way ($B6), its phase ($B5: 0 pad, 1 ascent, 2 orbit, 3
+  // entry, 4 landing), the pre-flight checks ($AE counts 1-9), the abort code
+  // ($9F, the manual's stat message number), whether the stick has been touched ($F7,
+  // $FF once it has: in flight 1 the pilot has taken over) and the speed ($A6, mach x 10)
+  const name = (what) => {
+    if (touch) return what === 'status' ? 'Status' : 'Activate Countdown';
+    if (pad) return what === 'status' ? 'Status (Back)' : 'Activate Countdown (Start)';
+    return what === 'status' ? 'Status (X)' : 'Activate Countdown (Enter)';
+  };
   function phaseHint() {
-    const ram = game.bus.ram, flight = ram[0xa0 & 0x7f], phase = ram[0xb5 & 0x7f];
-    if (!ram[0xb6 & 0x7f]) return `Hold ${status} to pick a flight (1 flies itself). Engines shut down, doors closed, then hold ${countdown}.`;
-    if (flight === 1) return 'Flight 1 flies itself: touch the hand controller to take over.';
+    const ram = game.bus.ram, at = (a) => ram[a & 0x7f];
+    const phase = at(0xb5), abort = at(0x9f);
+    const pick = `Hold ${name('status')} to pick a flight (1 flies itself). Engines shut down, doors closed, then press ${name('countdown')}.`;
+    if (!at(0xb6)) {
+      if (abort) return `Mission aborted: stat message ${abort.toString(16)} in the manual. ${pick}`;
+      if (phase === 4) return `Landed. ${pick}`;
+      if (at(0xae)) return 'Pre-flight checks running (about ten seconds): leave the engines shut down. The clock then counts down from MET-015.';
+      return pick;
+    }
+    if (at(0xa0) === 1 && at(0xf7) !== 0xff) return 'Flight 1 flies itself: touch the hand controller to take over.';
+    if (phase === 2 && at(0xa6) < 200) return 'Set up for reentry now, before you drop out of orbit: yaw back to 0, pull back to pitch +24, engines off, doors closed.';
     return [
       'Primary Engines on at MET-015. Hold the button the moment MET-004 appears.',
       'Keep T on C with taps, follow the trajectory, keep the plane centred. Engines off at about 205 miles.',
       'Orbit: engines on, pitch -28, engines off, doors open. Dock: Z, Y, then X to 0. Deorbit once X reaches 128.',
       'Reentry: pitch +24, engines off, doors closed. Follow the course on the computer screen.',
-      'Landing: turn right to line up, keep steering. Gear down when range goes negative, then hold forward.',
+      'Landing: turn right to line up, keep steering. Left dot on the S-F curve, right dot on the runway line. Gear down when range goes negative, then hold forward.',
     ][phase] ?? '';
   }
   function showNote() {
@@ -196,10 +211,13 @@ export function mountPlayer(root) {
   }
   setVolume(Number(store.get('shuttle-volume') ?? 70));
   volumeSlider?.addEventListener('input', () => setVolume(Number(volumeSlider.value)));
+  volumeSlider?.addEventListener('change', () => refocus());
 
   playButton?.addEventListener('click', play);
-  pauseButtons.forEach((b) => b.addEventListener('click', () => { if (started) togglePause(); }));
-  muteButtons.forEach((b) => b.addEventListener('click', toggleMute));
+  // the tray controls hand the keys back to the game, or Space would press them again
+  const refocus = () => { if (started) canvas.focus({ preventScroll: true }); };
+  pauseButtons.forEach((b) => b.addEventListener('click', () => { if (started) togglePause(); refocus(); }));
+  muteButtons.forEach((b) => b.addEventListener('click', () => { toggleMute(); refocus(); }));
 
   canvas.addEventListener('keydown', (event) => {
     const control = KEYS[event.code];
