@@ -191,7 +191,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x0115: c.cycles += 3; c.a = c.setNZ(c.read(0xc1)); // d115 lda $c1
       case 0x0117: c.cycles += 2; c.a = c.setNZ(c.a & 0x20); // d117 and $20
       case 0x0119: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x11d; continue; } // d119 beq $0002
-      case 0x011b: c.cycles += 2; c.x = c.setNZ(0x82); // d11b ldx $82 (traced, not executed)
+      case 0x011b: c.cycles += 2; c.x = c.setNZ(0x82); // d11b ldx $82
       // LD11D
       case 0x011d: c.cycles += 3; c.write(0x07, c.x); if (bus.frame !== frame) { c.pc = hi | 0x11f; return true; } // d11d stx $07
       case 0x011f: c.cycles += 2; c.x = c.setNZ(0x08); // d11f ldx $08
@@ -300,13 +300,13 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x01bb: c.cycles += 3; c.write(0x0f, c.a); if (bus.frame !== frame) { c.pc = hi | 0x1bd; return true; } // d1bb sta $0f
       case 0x01bd: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x1cd; continue; } // d1bd bcs $000e
       // c1
-      case 0x01bf: c.cycles += 3; c.a = c.setNZ(c.read(0xc1)); // d1bf lda $c1 (traced, not executed)
-      case 0x01c1: c.cycles += 2; c.a = c.setNZ(c.a & 0x10); // d1c1 and $10 (traced, not executed)
-      case 0x01c3: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1cd; continue; } // d1c3 beq $0008 (traced, not executed)
-      case 0x01c5: c.cycles += 2; c.x = c.setNZ(0x86); // d1c5 ldx $86 (traced, not executed)
-      case 0x01c7: c.cycles += 3; c.write(0x08, c.x); if (bus.frame !== frame) { c.pc = hi | 0x1c9; return true; } // d1c7 stx $08 (traced, not executed)
-      case 0x01c9: c.cycles += 2; c.y = c.setNZ(0x80); // d1c9 ldy $80 (traced, not executed)
-      case 0x01cb: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1e1; continue; } // d1cb bne $0014 (traced, not executed)
+      case 0x01bf: c.cycles += 3; c.a = c.setNZ(c.read(0xc1)); // d1bf lda $c1
+      case 0x01c1: c.cycles += 2; c.a = c.setNZ(c.a & 0x10); // d1c1 and $10
+      case 0x01c3: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1cd; continue; } // d1c3 beq $0008
+      case 0x01c5: c.cycles += 2; c.x = c.setNZ(0x86); // d1c5 ldx $86
+      case 0x01c7: c.cycles += 3; c.write(0x08, c.x); if (bus.frame !== frame) { c.pc = hi | 0x1c9; return true; } // d1c7 stx $08
+      case 0x01c9: c.cycles += 2; c.y = c.setNZ(0x80); // d1c9 ldy $80
+      case 0x01cb: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1e1; continue; } // d1cb bne $0014
       // LD1CD
       case 0x01cd: c.cycles += 3; c.write(0x08, c.x); if (bus.frame !== frame) { c.pc = hi | 0x1cf; return true; } // d1cd stx $08
       case 0x01cf: c.cycles += 2; c.y = c.setNZ(0x0a); // d1cf ldy $0a
@@ -664,53 +664,53 @@ export function run(c, bus, maxCycles = 400000) {
       // a4
       case 0x03c1: c.cycles += 3; c.a = c.setNZ(c.read(0xa4)); // d3c1 lda $a4
       case 0x03c3: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 2; pc = hi | 0x403; continue; } // d3c3 beq $003e
-      case 0x03c5: c.cycles += 3; c.y = c.setNZ(c.read(0x84)); // d3c5 ldy $84 (traced, not executed)
-      case 0x03c7: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3cf; continue; } // d3c7 beq $0006 (traced, not executed)
-      case 0x03c9: c.cycles += 2; c.cmp(c.y, 0x03); // d3c9 cpy $03 (traced, not executed)
-      case 0x03cb: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 2; pc = hi | 0x403; continue; } // d3cb bne $0036 (traced, not executed)
+      case 0x03c5: c.cycles += 3; c.y = c.setNZ(c.read(0x84)); // d3c5 ldy $84
+      case 0x03c7: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3cf; continue; } // d3c7 beq $0006
+      case 0x03c9: c.cycles += 2; c.cmp(c.y, 0x03); // d3c9 cpy $03
+      case 0x03cb: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 2; pc = hi | 0x403; continue; } // d3cb bne $0036
       case 0x03cd: c.cycles += 2; c.adc(0x14); // d3cd adc $14 (traced, not executed)
       // LD3CF
       // aa
-      case 0x03cf: c.cycles += 2; c.x = c.setNZ(c.a); // d3cf tax (traced, not executed)
-      case 0x03d0: c.cycles += 4; c.a = c.setNZ(c.read(c.indexed(0xd868, c.x))); // d3d0 lda $d868 (traced, not executed)
+      case 0x03cf: c.cycles += 2; c.x = c.setNZ(c.a); // d3cf tax
+      case 0x03d0: c.cycles += 4; c.a = c.setNZ(c.read(c.indexed(0xd868, c.x))); // d3d0 lda $d868
       // f8
-      case 0x03d3: c.cycles += 3; c.x = c.setNZ(c.read(0xf8)); // d3d3 ldx $f8 (traced, not executed)
+      case 0x03d3: c.cycles += 3; c.x = c.setNZ(c.read(0xf8)); // d3d3 ldx $f8
       // e8
-      case 0x03d5: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // d3d5 inx (traced, not executed)
-      case 0x03d6: c.cycles += 2; c.p &= ~0x01; // d3d6 clc (traced, not executed)
-      case 0x03d7: c.cycles += 4; c.adc(c.read(c.indexed(0xdafa, c.x))); // d3d7 adc $dafa (traced, not executed)
+      case 0x03d5: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // d3d5 inx
+      case 0x03d6: c.cycles += 2; c.p &= ~0x01; // d3d6 clc
+      case 0x03d7: c.cycles += 4; c.adc(c.read(c.indexed(0xdafa, c.x))); // d3d7 adc $dafa
       // f6
-      case 0x03da: c.cycles += 3; c.cmp(c.a, c.read(0xf6)); // d3da cmp $f6 (traced, not executed)
-      case 0x03dc: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3e7; continue; } // d3dc bcc $0009 (traced, not executed)
-      case 0x03de: c.cycles += 4; c.sbc(c.read(c.indexed(0xd9e6, c.x))); // d3de sbc $d9e6 (traced, not executed)
+      case 0x03da: c.cycles += 3; c.cmp(c.a, c.read(0xf6)); // d3da cmp $f6
+      case 0x03dc: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3e7; continue; } // d3dc bcc $0009
+      case 0x03de: c.cycles += 4; c.sbc(c.read(c.indexed(0xd9e6, c.x))); // d3de sbc $d9e6
       // f6
-      case 0x03e1: c.cycles += 3; c.cmp(c.a, c.read(0xf6)); // d3e1 cmp $f6 (traced, not executed)
-      case 0x03e3: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3f9; continue; } // d3e3 bcc $0014 (traced, not executed)
-      case 0x03e5: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3f9; continue; } // d3e5 beq $0012 (traced, not executed)
+      case 0x03e1: c.cycles += 3; c.cmp(c.a, c.read(0xf6)); // d3e1 cmp $f6
+      case 0x03e3: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3f9; continue; } // d3e3 bcc $0014
+      case 0x03e5: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3f9; continue; } // d3e5 beq $0012
       // LD3E7
       // f5
-      case 0x03e7: c.cycles += 5; c.rmw(0xf5, (v) => c.setNZ((v + 1) & 0xff)); // d3e7 inc $f5 (traced, not executed)
+      case 0x03e7: c.cycles += 5; c.rmw(0xf5, (v) => c.setNZ((v + 1) & 0xff)); // d3e7 inc $f5
       // e3
-      case 0x03e9: c.cycles += 3; c.x = c.setNZ(c.read(0xe3)); // d3e9 ldx $e3 (traced, not executed)
-      case 0x03eb: c.cycles += 2; c.cmp(c.x, 0x06); // d3eb cpx $06 (traced, not executed)
-      case 0x03ed: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3f1; continue; } // d3ed bne $0002 (traced, not executed)
+      case 0x03e9: c.cycles += 3; c.x = c.setNZ(c.read(0xe3)); // d3e9 ldx $e3
+      case 0x03eb: c.cycles += 2; c.cmp(c.x, 0x06); // d3eb cpx $06
+      case 0x03ed: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3f1; continue; } // d3ed bne $0002
       // f5
       case 0x03ef: c.cycles += 5; c.rmw(0xf5, (v) => c.setNZ((v + 1) & 0xff)); // d3ef inc $f5 (traced, not executed)
       // LD3F1
-      case 0x03f1: c.cycles += 2; c.a = c.setNZ(0x41); // d3f1 lda $41 (traced, not executed)
+      case 0x03f1: c.cycles += 2; c.a = c.setNZ(0x41); // d3f1 lda $41
       // ca
-      case 0x03f3: c.cycles += 3; c.x = c.setNZ(c.read(0xca)); // d3f3 ldx $ca (traced, not executed)
-      case 0x03f5: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 2; pc = hi | 0x403; continue; } // d3f5 bne $000c (traced, not executed)
-      case 0x03f7: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 2; pc = hi | 0x401; continue; } // d3f7 beq $0008 (traced, not executed)
+      case 0x03f3: c.cycles += 3; c.x = c.setNZ(c.read(0xca)); // d3f3 ldx $ca
+      case 0x03f5: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 2; pc = hi | 0x403; continue; } // d3f5 bne $000c
+      case 0x03f7: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 2; pc = hi | 0x401; continue; } // d3f7 beq $0008
       // LD3F9
-      case 0x03f9: c.cycles += 2; c.a = c.setNZ(0x00); // d3f9 lda $00 (traced, not executed)
+      case 0x03f9: c.cycles += 2; c.a = c.setNZ(0x00); // d3f9 lda $00
       // ca
-      case 0x03fb: c.cycles += 3; c.x = c.setNZ(c.read(0xca)); // d3fb ldx $ca (traced, not executed)
-      case 0x03fd: c.cycles += 2; c.cmp(c.x, 0x41); // d3fd cpx $41 (traced, not executed)
-      case 0x03ff: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x403; continue; } // d3ff bne $0002 (traced, not executed)
+      case 0x03fb: c.cycles += 3; c.x = c.setNZ(c.read(0xca)); // d3fb ldx $ca
+      case 0x03fd: c.cycles += 2; c.cmp(c.x, 0x41); // d3fd cpx $41
+      case 0x03ff: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x403; continue; } // d3ff bne $0002
       // LD401
       // ca
-      case 0x0401: c.cycles += 3; c.write(0xca, c.a); // d401 sta $ca (traced, not executed)
+      case 0x0401: c.cycles += 3; c.write(0xca, c.a); // d401 sta $ca
       // LD403
       case 0x0403: c.cycles += 2; c.x = c.setNZ(0x00); // d403 ldx $00
       case 0x0405: c.cycles += 3; c.a = c.setNZ(c.read(0x81)); // d405 lda $81
@@ -721,7 +721,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x040f: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x412; continue; } // d40f bcc $0001
       // LD411
       // ca
-      case 0x0411: c.cycles += 2; c.x = c.setNZ((c.x - 1) & 0xff); // d411 dex (traced, not executed)
+      case 0x0411: c.cycles += 2; c.x = c.setNZ((c.x - 1) & 0xff); // d411 dex
       // LD412
       // a1
       case 0x0412: c.cycles += 3; c.write(0xa1, c.x); // d412 stx $a1
@@ -1143,7 +1143,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x0623: c.cycles += 4; c.bit(c.read(0xb0c6)); pc = hi | 0x626; continue; // d623 bit $b0c6 ; $D623 bit: skips the next instruction on this path
       // LD624
       // b0
-      case 0x0624: c.cycles += 5; c.rmw(0xb0, (v) => c.setNZ((v - 1) & 0xff)); // d624 dec $b0 (traced, not executed)
+      case 0x0624: c.cycles += 5; c.rmw(0xb0, (v) => c.setNZ((v - 1) & 0xff)); // d624 dec $b0
       // e3
       case 0x0626: c.cycles += 3; c.x = c.setNZ(c.read(0xe3)); // d626 ldx $e3
       // bd
@@ -1542,7 +1542,7 @@ export function run(c, bus, maxCycles = 400000) {
       // a0
       case 0x0829: c.cycles += 2; c.cmp(c.a, 0xa0); // d829 cmp $a0
       case 0x082b: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x82f; continue; } // d82b bcc $0002
-      case 0x082d: c.cycles += 2; c.sbc(0x9f); // d82d sbc $9f (traced, not executed)
+      case 0x082d: c.cycles += 2; c.sbc(0x9f); // d82d sbc $9f
       // LD82F
       case 0x082f: c.cycles += 2; c.a = c.lsr(c.a); // d82f lsr
       case 0x0830: c.cycles += 2; c.a = c.lsr(c.a); // d830 lsr
@@ -1781,7 +1781,7 @@ export function run(c, bus, maxCycles = 400000) {
       // a1
       case 0x106d: c.cycles += 3; c.x = c.setNZ(c.read(0xa1)); // f06d ldx $a1
       case 0x106f: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x073; continue; } // f06f beq $0002
-      case 0x1071: c.cycles += 2; c.adc(0x02); // f071 adc $02 (traced, not executed)
+      case 0x1071: c.cycles += 2; c.adc(0x02); // f071 adc $02
       // LF073
       case 0x1073: c.cycles += 6; { const r = hi | 0x075; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcae; continue; // f073 jsr $fcae
       // LF076
@@ -1830,21 +1830,21 @@ export function run(c, bus, maxCycles = 400000) {
       // f9
       case 0x10aa: c.cycles += 3; c.bit(c.read(0xf9)); // f0aa bit $f9
       case 0x10ac: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x0c3; continue; } // f0ac bmi $0015
-      case 0x10ae: c.cycles += 2; c.x = c.setNZ(0x90); // f0ae ldx $90 (traced, not executed)
-      case 0x10b0: c.cycles += 2; c.a = c.setNZ(0x21); // f0b0 lda $21 (traced, not executed)
+      case 0x10ae: c.cycles += 2; c.x = c.setNZ(0x90); // f0ae ldx $90
+      case 0x10b0: c.cycles += 2; c.a = c.setNZ(0x21); // f0b0 lda $21
       // aa
-      case 0x10b2: c.cycles += 3; c.sbc(c.read(0xaa)); // f0b2 sbc $aa (traced, not executed)
-      case 0x10b4: c.cycles += 2; c.cmp(c.a, 0x08); // f0b4 cmp $08 (traced, not executed)
-      case 0x10b6: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x0bd; continue; } // f0b6 bcc $0005 (traced, not executed)
+      case 0x10b2: c.cycles += 3; c.sbc(c.read(0xaa)); // f0b2 sbc $aa
+      case 0x10b4: c.cycles += 2; c.cmp(c.a, 0x08); // f0b4 cmp $08
+      case 0x10b6: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x0bd; continue; } // f0b6 bcc $0005
       // LF0B8
-      case 0x10b8: c.cycles += 6; { const r = hi | 0x0ba; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // f0b8 jsr $fcc7 (traced, not executed)
-      case 0x10bb: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x0db; continue; } // f0bb bcs $001e (traced, not executed)
+      case 0x10b8: c.cycles += 6; { const r = hi | 0x0ba; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // f0b8 jsr $fcc7
+      case 0x10bb: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x0db; continue; } // f0bb bcs $001e
       // LF0BD
-      case 0x10bd: c.cycles += 2; c.a = c.asl(c.a); // f0bd asl (traced, not executed)
-      case 0x10be: c.cycles += 2; c.a = c.asl(c.a); // f0be asl (traced, not executed)
-      case 0x10bf: c.cycles += 2; c.a = c.asl(c.a); // f0bf asl (traced, not executed)
-      case 0x10c0: c.cycles += 2; c.a = c.asl(c.a); // f0c0 asl (traced, not executed)
-      case 0x10c1: c.cycles += 2; c.adc(0x40); // f0c1 adc $40 (traced, not executed)
+      case 0x10bd: c.cycles += 2; c.a = c.asl(c.a); // f0bd asl
+      case 0x10be: c.cycles += 2; c.a = c.asl(c.a); // f0be asl
+      case 0x10bf: c.cycles += 2; c.a = c.asl(c.a); // f0bf asl
+      case 0x10c0: c.cycles += 2; c.a = c.asl(c.a); // f0c0 asl
+      case 0x10c1: c.cycles += 2; c.adc(0x40); // f0c1 adc $40
       // LF0C3
       // b0
       case 0x10c3: c.cycles += 3; c.write(0xb0, c.a); // f0c3 sta $b0
@@ -1857,11 +1857,11 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x10cb: c.cycles += 3; c.bit(c.read(0xf9)); // f0cb bit $f9
       case 0x10cd: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x0d5; continue; } // f0cd bmi $0006
       // b2
-      case 0x10cf: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f0cf lda $b2 (traced, not executed)
-      case 0x10d1: c.cycles += 2; c.a = c.asl(c.a); // f0d1 asl (traced, not executed)
-      case 0x10d2: c.cycles += 2; c.a = c.asl(c.a); // f0d2 asl (traced, not executed)
-      case 0x10d3: c.cycles += 2; c.a = c.asl(c.a); // f0d3 asl (traced, not executed)
-      case 0x10d4: c.cycles += 2; c.a = c.asl(c.a); // f0d4 asl (traced, not executed)
+      case 0x10cf: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f0cf lda $b2
+      case 0x10d1: c.cycles += 2; c.a = c.asl(c.a); // f0d1 asl
+      case 0x10d2: c.cycles += 2; c.a = c.asl(c.a); // f0d2 asl
+      case 0x10d3: c.cycles += 2; c.a = c.asl(c.a); // f0d3 asl
+      case 0x10d4: c.cycles += 2; c.a = c.asl(c.a); // f0d4 asl
       // LF0D5
       // b2
       case 0x10d5: c.cycles += 3; c.write(0xb2, c.a); // f0d5 sta $b2
@@ -1908,24 +1908,24 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x110b: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x14c; continue; } // f10b beq $003f
       case 0x110d: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x123; continue; } // f10d bpl $0014
       // LF10F
-      case 0x110f: c.cycles += 3; c.bit(c.read(0x0c)); // f10f bit $0c (traced, not executed)
-      case 0x1111: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x14c; continue; } // f111 bmi $0039 (traced, not executed)
+      case 0x110f: c.cycles += 3; c.bit(c.read(0x0c)); // f10f bit $0c
+      case 0x1111: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x14c; continue; } // f111 bmi $0039
       // a9
-      case 0x1113: c.cycles += 3; c.x = c.setNZ(c.read(0xa9)); // f113 ldx $a9 (traced, not executed)
-      case 0x1115: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x121; continue; } // f115 bne $000a (traced, not executed)
+      case 0x1113: c.cycles += 3; c.x = c.setNZ(c.read(0xa9)); // f113 ldx $a9
+      case 0x1115: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x121; continue; } // f115 bne $000a
       // e8
-      case 0x1117: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // f117 inx (traced, not executed)
-      case 0x1118: c.cycles += 3; c.a = c.setNZ(c.read(0x82)); // f118 lda $82 (traced, not executed)
-      case 0x111a: c.cycles += 3; c.cmp(c.a, c.read(0x81)); // f11a cmp $81 (traced, not executed)
-      case 0x111c: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x11f; continue; } // f11c bcs $0001 (traced, not executed)
+      case 0x1117: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // f117 inx
+      case 0x1118: c.cycles += 3; c.a = c.setNZ(c.read(0x82)); // f118 lda $82
+      case 0x111a: c.cycles += 3; c.cmp(c.a, c.read(0x81)); // f11a cmp $81
+      case 0x111c: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x11f; continue; } // f11c bcs $0001
       // e8
-      case 0x111e: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // f11e inx (traced, not executed)
+      case 0x111e: c.cycles += 2; c.x = c.setNZ((c.x + 1) & 0xff); // f11e inx
       // LF11F
       // a9
-      case 0x111f: c.cycles += 3; c.write(0xa9, c.x); // f11f stx $a9 (traced, not executed)
+      case 0x111f: c.cycles += 3; c.write(0xa9, c.x); // f11f stx $a9
       // LF121
       // a9
-      case 0x1121: c.cycles += 3; c.a = c.setNZ(c.read(0xa9)); // f121 lda $a9 (traced, not executed)
+      case 0x1121: c.cycles += 3; c.a = c.setNZ(c.read(0xa9)); // f121 lda $a9
       // LF123
       case 0x1123: c.cycles += 2; c.a = c.lsr(c.a); // f123 lsr
       case 0x1124: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x129; continue; } // f124 bcs $0003
@@ -2056,11 +2056,11 @@ export function run(c, bus, maxCycles = 400000) {
       // f1
       case 0x11cc: c.cycles += 3; c.a = c.setNZ(c.read(0xf1)); // f1cc lda $f1
       case 0x11ce: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1d8; continue; } // f1ce beq $0008
-      case 0x11d0: c.cycles += 2; c.a = c.setNZ(0x00); // f1d0 lda $00 (traced, not executed)
+      case 0x11d0: c.cycles += 2; c.a = c.setNZ(0x00); // f1d0 lda $00
       // f1
-      case 0x11d2: c.cycles += 3; c.write(0xf1, c.a); // f1d2 sta $f1 (traced, not executed)
-      case 0x11d4: c.cycles += 3; c.write(0x9f, c.a); // f1d4 sta $9f (traced, not executed)
-      case 0x11d6: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1fe; continue; } // f1d6 beq $0026 (traced, not executed)
+      case 0x11d2: c.cycles += 3; c.write(0xf1, c.a); // f1d2 sta $f1
+      case 0x11d4: c.cycles += 3; c.write(0x9f, c.a); // f1d4 sta $9f
+      case 0x11d6: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x1fe; continue; } // f1d6 beq $0026
       // LF1D8
       case 0x11d8: c.cycles += 3; c.a = c.setNZ(c.read(0x85)); // f1d8 lda $85
       // b7
@@ -2329,7 +2329,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1336: c.cycles += 2; c.x = c.setNZ(0x17); // f336 ldx $17
       case 0x1338: c.cycles += 3; c.bit(c.read(0x0c)); // f338 bit $0c
       case 0x133a: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x33e; continue; } // f33a bmi $0002
-      case 0x133c: c.cycles += 2; c.x = c.setNZ(0x03); // f33c ldx $03 (traced, not executed)
+      case 0x133c: c.cycles += 2; c.x = c.setNZ(0x03); // f33c ldx $03
       // LF33E
       case 0x133e: c.cycles += 3; c.write(0x85, c.x); // f33e stx $85
       case 0x1340: c.cycles += 2; c.y = c.setNZ(0x01); // f340 ldy $01
@@ -2340,80 +2340,80 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1347: c.cycles += 2; c.cmp(c.a, 0xf0); // f347 cmp $f0
       case 0x1349: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a5; continue; } // f349 beq $005a
       // c0
-      case 0x134b: c.cycles += 5; c.rmw(0xc0, (v) => c.setNZ((v - 1) & 0xff)); // f34b dec $c0 (traced, not executed)
+      case 0x134b: c.cycles += 5; c.rmw(0xc0, (v) => c.setNZ((v - 1) & 0xff)); // f34b dec $c0
       // LF34D
       case 0x134d: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f34d bne $0058
-      case 0x134f: c.cycles += 2; c.x = c.setNZ(0x04); // f34f ldx $04 (traced, not executed)
+      case 0x134f: c.cycles += 2; c.x = c.setNZ(0x04); // f34f ldx $04
       // c0
-      case 0x1351: c.cycles += 3; c.write(0xc0, c.x); // f351 stx $c0 (traced, not executed)
+      case 0x1351: c.cycles += 3; c.write(0xc0, c.x); // f351 stx $c0
       // aa
-      case 0x1353: c.cycles += 2; c.x = c.setNZ(c.a); // f353 tax (traced, not executed)
-      case 0x1354: c.cycles += 2; c.a = c.setNZ(c.x); // f354 txa (traced, not executed)
-      case 0x1355: c.cycles += 2; c.a = c.asl(c.a); // f355 asl (traced, not executed)
+      case 0x1353: c.cycles += 2; c.x = c.setNZ(c.a); // f353 tax
+      case 0x1354: c.cycles += 2; c.a = c.setNZ(c.x); // f354 txa
+      case 0x1355: c.cycles += 2; c.a = c.asl(c.a); // f355 asl
       // aa
-      case 0x1356: c.cycles += 2; c.x = c.setNZ(c.a); // f356 tax (traced, not executed)
-      case 0x1357: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x36b; continue; } // f357 bcs $0012 (traced, not executed)
+      case 0x1356: c.cycles += 2; c.x = c.setNZ(c.a); // f356 tax
+      case 0x1357: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x36b; continue; } // f357 bcs $0012
       // b2
-      case 0x1359: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f359 dec $b2 (traced, not executed)
+      case 0x1359: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f359 dec $b2
       // b2
-      case 0x135b: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f35b lda $b2 (traced, not executed)
+      case 0x135b: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f35b lda $b2
       // ff
-      case 0x135d: c.cycles += 2; c.cmp(c.a, 0xff); // f35d cmp $ff (traced, not executed)
-      case 0x135f: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x365; continue; } // f35f bne $0004 (traced, not executed)
-      case 0x1361: c.cycles += 2; c.a = c.setNZ(0x9f); // f361 lda $9f (traced, not executed)
+      case 0x135d: c.cycles += 2; c.cmp(c.a, 0xff); // f35d cmp $ff
+      case 0x135f: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x365; continue; } // f35f bne $0004
+      case 0x1361: c.cycles += 2; c.a = c.setNZ(0x9f); // f361 lda $9f
       // b2
-      case 0x1363: c.cycles += 3; c.write(0xb2, c.a); // f363 sta $b2 (traced, not executed)
+      case 0x1363: c.cycles += 3; c.write(0xb2, c.a); // f363 sta $b2
       // LF365
-      case 0x1365: c.cycles += 2; c.cmp(c.a, 0x4f); // f365 cmp $4f (traced, not executed)
-      case 0x1367: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x36b; continue; } // f367 bne $0002 (traced, not executed)
+      case 0x1365: c.cycles += 2; c.cmp(c.a, 0x4f); // f365 cmp $4f
+      case 0x1367: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x36b; continue; } // f367 bne $0002
       // b2
-      case 0x1369: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f369 inc $b2 (traced, not executed)
+      case 0x1369: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f369 inc $b2
       // LF36B
-      case 0x136b: c.cycles += 2; c.a = c.setNZ(c.x); // f36b txa (traced, not executed)
-      case 0x136c: c.cycles += 2; c.a = c.asl(c.a); // f36c asl (traced, not executed)
+      case 0x136b: c.cycles += 2; c.a = c.setNZ(c.x); // f36b txa
+      case 0x136c: c.cycles += 2; c.a = c.asl(c.a); // f36c asl
       // aa
-      case 0x136d: c.cycles += 2; c.x = c.setNZ(c.a); // f36d tax (traced, not executed)
-      case 0x136e: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x382; continue; } // f36e bcs $0012 (traced, not executed)
+      case 0x136d: c.cycles += 2; c.x = c.setNZ(c.a); // f36d tax
+      case 0x136e: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x382; continue; } // f36e bcs $0012
       // b2
-      case 0x1370: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f370 inc $b2 (traced, not executed)
+      case 0x1370: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f370 inc $b2
       // b2
-      case 0x1372: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f372 lda $b2 (traced, not executed)
+      case 0x1372: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f372 lda $b2
       // a0
-      case 0x1374: c.cycles += 2; c.cmp(c.a, 0xa0); // f374 cmp $a0 (traced, not executed)
-      case 0x1376: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x37c; continue; } // f376 bne $0004 (traced, not executed)
-      case 0x1378: c.cycles += 2; c.a = c.setNZ(0x00); // f378 lda $00 (traced, not executed)
+      case 0x1374: c.cycles += 2; c.cmp(c.a, 0xa0); // f374 cmp $a0
+      case 0x1376: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x37c; continue; } // f376 bne $0004
+      case 0x1378: c.cycles += 2; c.a = c.setNZ(0x00); // f378 lda $00
       // b2
-      case 0x137a: c.cycles += 3; c.write(0xb2, c.a); // f37a sta $b2 (traced, not executed)
+      case 0x137a: c.cycles += 3; c.write(0xb2, c.a); // f37a sta $b2
       // LF37C
-      case 0x137c: c.cycles += 2; c.cmp(c.a, 0x50); // f37c cmp $50 (traced, not executed)
-      case 0x137e: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x382; continue; } // f37e bne $0002 (traced, not executed)
+      case 0x137c: c.cycles += 2; c.cmp(c.a, 0x50); // f37c cmp $50
+      case 0x137e: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x382; continue; } // f37e bne $0002
       // b2
-      case 0x1380: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f380 dec $b2 (traced, not executed)
+      case 0x1380: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f380 dec $b2
       // LF382
       // f3
-      case 0x1382: c.cycles += 3; c.a = c.setNZ(c.read(0xf3)); // f382 lda $f3 (traced, not executed)
-      case 0x1384: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f384 bne $0021 (traced, not executed)
+      case 0x1382: c.cycles += 3; c.a = c.setNZ(c.read(0xf3)); // f382 lda $f3
+      case 0x1384: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f384 bne $0021
       // ca
-      case 0x1386: c.cycles += 3; c.a = c.setNZ(c.read(0xca)); // f386 lda $ca (traced, not executed)
-      case 0x1388: c.cycles += 2; c.cmp(c.a, 0x98); // f388 cmp $98 (traced, not executed)
-      case 0x138a: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f38a beq $001b (traced, not executed)
-      case 0x138c: c.cycles += 2; c.a = c.setNZ(c.x); // f38c txa (traced, not executed)
-      case 0x138d: c.cycles += 2; c.a = c.asl(c.a); // f38d asl (traced, not executed)
+      case 0x1386: c.cycles += 3; c.a = c.setNZ(c.read(0xca)); // f386 lda $ca
+      case 0x1388: c.cycles += 2; c.cmp(c.a, 0x98); // f388 cmp $98
+      case 0x138a: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f38a beq $001b
+      case 0x138c: c.cycles += 2; c.a = c.setNZ(c.x); // f38c txa
+      case 0x138d: c.cycles += 2; c.a = c.asl(c.a); // f38d asl
       // aa
-      case 0x138e: c.cycles += 2; c.x = c.setNZ(c.a); // f38e tax (traced, not executed)
-      case 0x138f: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x399; continue; } // f38f bcs $0008 (traced, not executed)
-      case 0x1391: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f391 lda $88 (traced, not executed)
-      case 0x1393: c.cycles += 2; c.cmp(c.a, 0x10); // f393 cmp $10 (traced, not executed)
-      case 0x1395: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f395 beq $0010 (traced, not executed)
-      case 0x1397: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v + 1) & 0xff)); // f397 inc $88 (traced, not executed)
+      case 0x138e: c.cycles += 2; c.x = c.setNZ(c.a); // f38e tax
+      case 0x138f: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x399; continue; } // f38f bcs $0008
+      case 0x1391: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f391 lda $88
+      case 0x1393: c.cycles += 2; c.cmp(c.a, 0x10); // f393 cmp $10
+      case 0x1395: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f395 beq $0010
+      case 0x1397: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v + 1) & 0xff)); // f397 inc $88
       // LF399
-      case 0x1399: c.cycles += 2; c.a = c.setNZ(c.x); // f399 txa (traced, not executed)
-      case 0x139a: c.cycles += 2; c.a = c.asl(c.a); // f39a asl (traced, not executed)
-      case 0x139b: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f39b bcs $000a (traced, not executed)
-      case 0x139d: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f39d lda $88 (traced, not executed)
-      case 0x139f: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f39f beq $0006 (traced, not executed)
-      case 0x13a1: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v - 1) & 0xff)); // f3a1 dec $88 (traced, not executed)
-      case 0x13a3: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f3a3 bpl $0002 (traced, not executed)
+      case 0x1399: c.cycles += 2; c.a = c.setNZ(c.x); // f399 txa
+      case 0x139a: c.cycles += 2; c.a = c.asl(c.a); // f39a asl
+      case 0x139b: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f39b bcs $000a
+      case 0x139d: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f39d lda $88
+      case 0x139f: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f39f beq $0006
+      case 0x13a1: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v - 1) & 0xff)); // f3a1 dec $88
+      case 0x13a3: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x3a7; continue; } // f3a3 bpl $0002
       // LF3A5
       // c0
       case 0x13a5: c.cycles += 3; c.write(0xc0, c.y); // f3a5 sty $c0
@@ -2598,7 +2598,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x148f: c.cycles += 3; c.y = c.setNZ(c.read(0x85)); // f48f ldy $85
       case 0x1491: c.cycles += 2; c.cmp(c.y, 0x15); // f491 cpy $15
       case 0x1493: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x497; continue; } // f493 bne $0002
-      case 0x1495: c.cycles += 2; c.a = c.setNZ(0x01); // f495 lda $01 (traced, not executed)
+      case 0x1495: c.cycles += 2; c.a = c.setNZ(0x01); // f495 lda $01
       // LF497
       case 0x1497: c.cycles += 6; { const r = hi | 0x499; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcae; continue; // f497 jsr $fcae
       // b6
@@ -2609,9 +2609,9 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x149e: c.cycles += 3; c.bit(c.read(0xf9)); // f49e bit $f9
       case 0x14a0: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0x4a8; continue; } // f4a0 bmi $0006
       // c6
-      case 0x14a2: c.cycles += 3; c.a = c.setNZ(c.read(0xc6)); // f4a2 lda $c6 (traced, not executed)
-      case 0x14a4: c.cycles += 2; c.a = c.setNZ(c.a & 0x48); // f4a4 and $48 (traced, not executed)
-      case 0x14a6: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x4f5; continue; } // f4a6 bne $004d (traced, not executed)
+      case 0x14a2: c.cycles += 3; c.a = c.setNZ(c.read(0xc6)); // f4a2 lda $c6
+      case 0x14a4: c.cycles += 2; c.a = c.setNZ(c.a & 0x48); // f4a4 and $48
+      case 0x14a6: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x4f5; continue; } // f4a6 bne $004d
       // LF4A8
       case 0x14a8: c.cycles += 2; c.a = c.setNZ(c.x); // f4a8 txa
       case 0x14a9: c.cycles += 2; c.a = c.lsr(c.a); // f4a9 lsr
@@ -2668,61 +2668,61 @@ export function run(c, bus, maxCycles = 400000) {
       // LF4F2
       case 0x14f2: c.cycles += 3; pc = 0xf5c7; continue; // f4f2 jmp $f5c7
       // LF4F5
-      case 0x14f5: c.cycles += 2; c.a = c.setNZ(c.x); // f4f5 txa (traced, not executed)
-      case 0x14f6: c.cycles += 2; c.a = c.lsr(c.a); // f4f6 lsr (traced, not executed)
+      case 0x14f5: c.cycles += 2; c.a = c.setNZ(c.x); // f4f5 txa
+      case 0x14f6: c.cycles += 2; c.a = c.lsr(c.a); // f4f6 lsr
       // a8
-      case 0x14f7: c.cycles += 2; c.y = c.setNZ(c.a); // f4f7 tay (traced, not executed)
-      case 0x14f8: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 2; pc = hi | 0x508; continue; } // f4f8 bcc $000e (traced, not executed)
-      case 0x14fa: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f4fa lda $88 (traced, not executed)
-      case 0x14fc: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v - 1) & 0xff)); // f4fc dec $88 (traced, not executed)
-      case 0x14fe: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x502; continue; } // f4fe bpl $0002 (traced, not executed)
+      case 0x14f7: c.cycles += 2; c.y = c.setNZ(c.a); // f4f7 tay
+      case 0x14f8: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 2; pc = hi | 0x508; continue; } // f4f8 bcc $000e
+      case 0x14fa: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f4fa lda $88
+      case 0x14fc: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v - 1) & 0xff)); // f4fc dec $88
+      case 0x14fe: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x502; continue; } // f4fe bpl $0002
       case 0x1500: c.cycles += 3; c.write(0x88, c.a); // f500 sta $88 (traced, not executed)
       // LF502
-      case 0x1502: c.cycles += 2; c.x = c.setNZ(0x01); // f502 ldx $01 (traced, not executed)
+      case 0x1502: c.cycles += 2; c.x = c.setNZ(0x01); // f502 ldx $01
       // LF504
-      case 0x1504: c.cycles += 2; c.a = c.setNZ(0x13); // f504 lda $13 (traced, not executed)
-      case 0x1506: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x532; continue; } // f506 bne $002a (traced, not executed)
+      case 0x1504: c.cycles += 2; c.a = c.setNZ(0x13); // f504 lda $13
+      case 0x1506: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x532; continue; } // f506 bne $002a
       // LF508
-      case 0x1508: c.cycles += 2; c.a = c.setNZ(c.y); // f508 tya (traced, not executed)
-      case 0x1509: c.cycles += 2; c.a = c.lsr(c.a); // f509 lsr (traced, not executed)
+      case 0x1508: c.cycles += 2; c.a = c.setNZ(c.y); // f508 tya
+      case 0x1509: c.cycles += 2; c.a = c.lsr(c.a); // f509 lsr
       // a8
-      case 0x150a: c.cycles += 2; c.y = c.setNZ(c.a); // f50a tay (traced, not executed)
-      case 0x150b: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x519; continue; } // f50b bcc $000c (traced, not executed)
-      case 0x150d: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f50d lda $88 (traced, not executed)
-      case 0x150f: c.cycles += 2; c.cmp(c.a, 0x10); // f50f cmp $10 (traced, not executed)
-      case 0x1511: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x515; continue; } // f511 beq $0002 (traced, not executed)
-      case 0x1513: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v + 1) & 0xff)); // f513 inc $88 (traced, not executed)
+      case 0x150a: c.cycles += 2; c.y = c.setNZ(c.a); // f50a tay
+      case 0x150b: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x519; continue; } // f50b bcc $000c
+      case 0x150d: c.cycles += 3; c.a = c.setNZ(c.read(0x88)); // f50d lda $88
+      case 0x150f: c.cycles += 2; c.cmp(c.a, 0x10); // f50f cmp $10
+      case 0x1511: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x515; continue; } // f511 beq $0002
+      case 0x1513: c.cycles += 5; c.rmw(0x88, (v) => c.setNZ((v + 1) & 0xff)); // f513 inc $88
       // LF515
-      case 0x1515: c.cycles += 2; c.x = c.setNZ(0x02); // f515 ldx $02 (traced, not executed)
+      case 0x1515: c.cycles += 2; c.x = c.setNZ(0x02); // f515 ldx $02
       // eb
-      case 0x1517: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x504; continue; } // f517 bne $00eb (traced, not executed)
+      case 0x1517: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x504; continue; } // f517 bne $00eb
       // LF519
-      case 0x1519: c.cycles += 2; c.a = c.setNZ(c.y); // f519 tya (traced, not executed)
-      case 0x151a: c.cycles += 2; c.a = c.lsr(c.a); // f51a lsr (traced, not executed)
+      case 0x1519: c.cycles += 2; c.a = c.setNZ(c.y); // f519 tya
+      case 0x151a: c.cycles += 2; c.a = c.lsr(c.a); // f51a lsr
       // a8
-      case 0x151b: c.cycles += 2; c.y = c.setNZ(c.a); // f51b tay (traced, not executed)
-      case 0x151c: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x524; continue; } // f51c bcc $0006 (traced, not executed)
+      case 0x151b: c.cycles += 2; c.y = c.setNZ(c.a); // f51b tay
+      case 0x151c: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x524; continue; } // f51c bcc $0006
       // b3
-      case 0x151e: c.cycles += 5; c.rmw(0xb3, (v) => c.setNZ((v - 1) & 0xff)); // f51e dec $b3 (traced, not executed)
-      case 0x1520: c.cycles += 2; c.x = c.setNZ(0x04); // f520 ldx $04 (traced, not executed)
-      case 0x1522: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x52c; continue; } // f522 bne $0008 (traced, not executed)
+      case 0x151e: c.cycles += 5; c.rmw(0xb3, (v) => c.setNZ((v - 1) & 0xff)); // f51e dec $b3
+      case 0x1520: c.cycles += 2; c.x = c.setNZ(0x04); // f520 ldx $04
+      case 0x1522: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x52c; continue; } // f522 bne $0008
       // LF524
-      case 0x1524: c.cycles += 2; c.a = c.setNZ(c.y); // f524 tya (traced, not executed)
-      case 0x1525: c.cycles += 2; c.a = c.lsr(c.a); // f525 lsr (traced, not executed)
-      case 0x1526: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x538; continue; } // f526 bcc $0010 (traced, not executed)
+      case 0x1524: c.cycles += 2; c.a = c.setNZ(c.y); // f524 tya
+      case 0x1525: c.cycles += 2; c.a = c.lsr(c.a); // f525 lsr
+      case 0x1526: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x538; continue; } // f526 bcc $0010
       // b3
-      case 0x1528: c.cycles += 5; c.rmw(0xb3, (v) => c.setNZ((v + 1) & 0xff)); // f528 inc $b3 (traced, not executed)
-      case 0x152a: c.cycles += 2; c.x = c.setNZ(0x08); // f52a ldx $08 (traced, not executed)
+      case 0x1528: c.cycles += 5; c.rmw(0xb3, (v) => c.setNZ((v + 1) & 0xff)); // f528 inc $b3
+      case 0x152a: c.cycles += 2; c.x = c.setNZ(0x08); // f52a ldx $08
       // LF52C
-      case 0x152c: c.cycles += 2; c.a = c.setNZ(0x05); // f52c lda $05 (traced, not executed)
+      case 0x152c: c.cycles += 2; c.a = c.setNZ(0x05); // f52c lda $05
       // c0
-      case 0x152e: c.cycles += 3; c.write(0xc0, c.a); // f52e sta $c0 (traced, not executed)
-      case 0x1530: c.cycles += 2; c.a = c.setNZ(0x15); // f530 lda $15 (traced, not executed)
+      case 0x152e: c.cycles += 3; c.write(0xc0, c.a); // f52e sta $c0
+      case 0x1530: c.cycles += 2; c.a = c.setNZ(0x15); // f530 lda $15
       // LF532
-      case 0x1532: c.cycles += 3; c.write(0x85, c.a); // f532 sta $85 (traced, not executed)
+      case 0x1532: c.cycles += 3; c.write(0x85, c.a); // f532 sta $85
       // ab
-      case 0x1534: c.cycles += 3; c.write(0xab, c.x); // f534 stx $ab (traced, not executed)
-      case 0x1536: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x577; continue; } // f536 bne $003f (traced, not executed)
+      case 0x1534: c.cycles += 3; c.write(0xab, c.x); // f534 stx $ab
+      case 0x1536: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x577; continue; } // f536 bne $003f
       // LF538
       // b3
       case 0x1538: c.cycles += 3; c.a = c.setNZ(c.read(0xb3)); // f538 lda $b3
@@ -2794,37 +2794,37 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x158f: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5c7; continue; } // f58f bcs $0036
       case 0x1591: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5c4; continue; } // f591 bcc $0031
       // LF593
-      case 0x1593: c.cycles += 2; c.cmp(c.x, 0x02); // f593 cpx $02 (traced, not executed)
-      case 0x1595: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x59d; continue; } // f595 bne $0006 (traced, not executed)
+      case 0x1593: c.cycles += 2; c.cmp(c.x, 0x02); // f593 cpx $02
+      case 0x1595: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x59d; continue; } // f595 bne $0006
       // b2
-      case 0x1597: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f597 dec $b2 (traced, not executed)
-      case 0x1599: c.cycles += 2; c.a = c.setNZ(0x05); // f599 lda $05 (traced, not executed)
-      case 0x159b: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x5b2; continue; } // f59b bne $0015 (traced, not executed)
+      case 0x1597: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v - 1) & 0xff)); // f597 dec $b2
+      case 0x1599: c.cycles += 2; c.a = c.setNZ(0x05); // f599 lda $05
+      case 0x159b: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x5b2; continue; } // f59b bne $0015
       // LF59D
-      case 0x159d: c.cycles += 2; c.cmp(c.x, 0x06); // f59d cpx $06 (traced, not executed)
-      case 0x159f: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5aa; continue; } // f59f bcs $0009 (traced, not executed)
+      case 0x159d: c.cycles += 2; c.cmp(c.x, 0x06); // f59d cpx $06
+      case 0x159f: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5aa; continue; } // f59f bcs $0009
       case 0x15a1: c.cycles += 6; { const r = hi | 0x5a3; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfeea; continue; // f5a1 jsr $feea (traced, not executed)
       case 0x15a4: c.cycles += 2; c.cmp(c.y, 0x07); // f5a4 cpy $07 (traced, not executed)
       case 0x15a6: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5be; continue; } // f5a6 bcs $0016 (traced, not executed)
       case 0x15a8: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5c7; continue; } // f5a8 bcc $001d (traced, not executed)
       // LF5AA
-      case 0x15aa: c.cycles += 2; c.cmp(c.x, 0x07); // f5aa cpx $07 (traced, not executed)
+      case 0x15aa: c.cycles += 2; c.cmp(c.x, 0x07); // f5aa cpx $07
       // dc
-      case 0x15ac: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x58a; continue; } // f5ac beq $00dc (traced, not executed)
+      case 0x15ac: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x58a; continue; } // f5ac beq $00dc
       // b2
-      case 0x15ae: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f5ae inc $b2 (traced, not executed)
-      case 0x15b0: c.cycles += 2; c.a = c.setNZ(0x09); // f5b0 lda $09 (traced, not executed)
+      case 0x15ae: c.cycles += 5; c.rmw(0xb2, (v) => c.setNZ((v + 1) & 0xff)); // f5ae inc $b2
+      case 0x15b0: c.cycles += 2; c.a = c.setNZ(0x09); // f5b0 lda $09
       // LF5B2
       // ab
-      case 0x15b2: c.cycles += 3; c.write(0xab, c.a); // f5b2 sta $ab (traced, not executed)
-      case 0x15b4: c.cycles += 2; c.x = c.setNZ(0x0f); // f5b4 ldx $0f (traced, not executed)
-      case 0x15b6: c.cycles += 3; c.write(0x85, c.x); // f5b6 stx $85 (traced, not executed)
-      case 0x15b8: c.cycles += 2; c.cmp(c.y, 0x07); // f5b8 cpy $07 (traced, not executed)
-      case 0x15ba: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x5c7; continue; } // f5ba beq $000b (traced, not executed)
-      case 0x15bc: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5c4; continue; } // f5bc bcc $0006 (traced, not executed)
+      case 0x15b2: c.cycles += 3; c.write(0xab, c.a); // f5b2 sta $ab
+      case 0x15b4: c.cycles += 2; c.x = c.setNZ(0x0f); // f5b4 ldx $0f
+      case 0x15b6: c.cycles += 3; c.write(0x85, c.x); // f5b6 stx $85
+      case 0x15b8: c.cycles += 2; c.cmp(c.y, 0x07); // f5b8 cpy $07
+      case 0x15ba: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x5c7; continue; } // f5ba beq $000b
+      case 0x15bc: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x5c4; continue; } // f5bc bcc $0006
       // LF5BE
-      case 0x15be: c.cycles += 6; { const r = hi | 0x5c0; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd20; continue; // f5be jsr $fd20 (traced, not executed)
-      case 0x15c1: c.cycles += 3; pc = 0xf5c7; continue; // f5c1 jmp $f5c7 (traced, not executed)
+      case 0x15be: c.cycles += 6; { const r = hi | 0x5c0; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd20; continue; // f5be jsr $fd20
+      case 0x15c1: c.cycles += 3; pc = 0xf5c7; continue; // f5c1 jmp $f5c7
       // LF5C4
       case 0x15c4: c.cycles += 6; { const r = hi | 0x5c6; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd42; continue; // f5c4 jsr $fd42
       // LF5C7
@@ -2910,8 +2910,8 @@ export function run(c, bus, maxCycles = 400000) {
       // c6
       case 0x162e: c.cycles += 3; c.x = c.setNZ(c.read(0xc6)); // f62e ldx $c6
       case 0x1630: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x63c; continue; } // f630 bpl $000a
-      case 0x1632: c.cycles += 2; c.a = c.lsr(c.a); // f632 lsr (traced, not executed)
-      case 0x1633: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x63c; continue; } // f633 bpl $0007 (traced, not executed)
+      case 0x1632: c.cycles += 2; c.a = c.lsr(c.a); // f632 lsr
+      case 0x1633: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x63c; continue; } // f633 bpl $0007
       // LF635
       // a4
       case 0x1635: c.cycles += 3; c.x = c.setNZ(c.read(0xa4)); // f635 ldx $a4
@@ -2966,8 +2966,8 @@ export function run(c, bus, maxCycles = 400000) {
       // f7
       case 0x1677: c.cycles += 3; c.bit(c.read(0xf7)); // f677 bit $f7
       case 0x1679: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0x680; continue; } // f679 bpl $0005
-      case 0x167b: c.cycles += 2; c.a = c.setNZ(0x27); // f67b lda $27 (traced, not executed)
-      case 0x167d: c.cycles += 4; c.bit(c.read(0x4fa9)); pc = hi | 0x680; continue; // f67d bit $4fa9 (traced, not executed) ; $F67D bit: skips the next instruction on this path
+      case 0x167b: c.cycles += 2; c.a = c.setNZ(0x27); // f67b lda $27
+      case 0x167d: c.cycles += 4; c.bit(c.read(0x4fa9)); pc = hi | 0x680; continue; // f67d bit $4fa9 ; $F67D bit: skips the next instruction on this path
       // LF67E
       case 0x167e: c.cycles += 2; c.a = c.setNZ(0x4f); // f67e lda $4f (traced, not executed)
       // LF680
@@ -3076,9 +3076,9 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1712: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // f712 lda $b2
       case 0x1714: c.cycles += 2; c.cmp(c.a, 0x18); // f714 cmp $18
       case 0x1716: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0x724; continue; } // f716 bcc $000c
-      case 0x1718: c.cycles += 2; c.cmp(c.a, 0x97); // f718 cmp $97 (traced, not executed)
-      case 0x171a: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x724; continue; } // f71a bcs $0008 (traced, not executed)
-      case 0x171c: c.cycles += 2; c.x = c.setNZ(0x10); // f71c ldx $10 (traced, not executed)
+      case 0x1718: c.cycles += 2; c.cmp(c.a, 0x97); // f718 cmp $97
+      case 0x171a: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0x724; continue; } // f71a bcs $0008
+      case 0x171c: c.cycles += 2; c.x = c.setNZ(0x10); // f71c ldx $10
       // LF71E
       case 0x171e: c.cycles += 6; { const r = hi | 0x720; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // f71e jsr $fcc7
       // LF721
@@ -3147,7 +3147,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1771: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x789; continue; } // f771 beq $0016
       case 0x1773: c.cycles += 2; c.cmp(c.y, 0x01); // f773 cpy $01
       case 0x1775: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x77c; continue; } // f775 bne $0005
-      case 0x1777: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x786; continue; } // f777 beq $000d (traced, not executed)
+      case 0x1777: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0x786; continue; } // f777 beq $000d
       case 0x1779: c.cycles += 3; pc = 0xfc3d; continue; // f779 jmp $fc3d
       // LF77C
       case 0x177c: c.cycles += 2; c.cmp(c.y, 0x02); // f77c cpy $02
@@ -3155,7 +3155,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1780: c.cycles += 6; { const r = hi | 0x782; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd20; continue; // f780 jsr $fd20
       case 0x1783: c.cycles += 3; pc = 0xf789; continue; // f783 jmp $f789
       // LF786
-      case 0x1786: c.cycles += 6; { const r = hi | 0x788; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd42; continue; // f786 jsr $fd42 (traced, not executed)
+      case 0x1786: c.cycles += 6; { const r = hi | 0x788; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfd42; continue; // f786 jsr $fd42
       // LF789
       case 0x1789: c.cycles += 3; c.x = c.setNZ(c.read(0x85)); // f789 ldx $85
       case 0x178b: c.cycles += 2; c.cmp(c.x, 0x0d); // f78b cpx $0d
@@ -3193,7 +3193,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x17b8: c.cycles += 2; c.cmp(c.x, 0x15); // f7b8 cpx $15
       case 0x17ba: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0x7f5; continue; } // f7ba bne $0039
       // b3
-      case 0x17bc: c.cycles += 3; c.a = c.setNZ(c.read(0xb3)); // f7bc lda $b3 (traced, not executed)
+      case 0x17bc: c.cycles += 3; c.a = c.setNZ(c.read(0xb3)); // f7bc lda $b3
       // LF7BE
       case 0x17be: c.cycles += 2; c.cmp(c.a, 0x80); // f7be cmp $80
       // LF7C0
@@ -3252,7 +3252,7 @@ export function run(c, bus, maxCycles = 400000) {
       // f1
       case 0x17fa: c.cycles += 3; c.a = c.setNZ(c.read(0xf1)); // f7fa lda $f1
       case 0x17fc: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 2; pc = hi | 0x800; continue; } // f7fc beq $0002
-      case 0x17fe: c.cycles += 2; c.y = c.setNZ(0x09); // f7fe ldy $09 (traced, not executed)
+      case 0x17fe: c.cycles += 2; c.y = c.setNZ(0x09); // f7fe ldy $09
       // LF800
       // fa
       case 0x1800: c.cycles += 3; c.write(0xfa, c.y); // f800 sty $fa
@@ -3700,7 +3700,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1a4d: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xa51; continue; } // fa4d bcc $0002
       // LFA4F
       // a0
-      case 0x1a4f: c.cycles += 2; c.sbc(0xa0); // fa4f sbc $a0 (traced, not executed)
+      case 0x1a4f: c.cycles += 2; c.sbc(0xa0); // fa4f sbc $a0
       // LFA51
       case 0x1a51: c.cycles += 6; { const r = hi | 0xa53; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfe00; continue; // fa51 jsr $fe00
       // e8
@@ -3713,7 +3713,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1a5a: c.cycles += 2; c.cmp(c.a, 0xa0); // fa5a cmp $a0
       case 0x1a5c: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xa60; continue; } // fa5c bcc $0002
       // a0
-      case 0x1a5e: c.cycles += 2; c.sbc(0xa0); // fa5e sbc $a0 (traced, not executed)
+      case 0x1a5e: c.cycles += 2; c.sbc(0xa0); // fa5e sbc $a0
       // LFA60
       case 0x1a60: c.cycles += 6; { const r = hi | 0xa62; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfe00; continue; // fa60 jsr $fe00
       case 0x1a63: c.cycles += 2; c.a = c.setNZ(0x17); // fa63 lda $17
@@ -3745,8 +3745,8 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1a90: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // fa90 lda $b2
       case 0x1a92: c.cycles += 2; c.cmp(c.a, 0x50); // fa92 cmp $50
       case 0x1a94: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xa99; continue; } // fa94 bcc $0003
-      case 0x1a96: c.cycles += 2; c.adc(0x5f); // fa96 adc $5f (traced, not executed)
-      case 0x1a98: c.cycles += 2; c.p &= ~0x01; // fa98 clc (traced, not executed)
+      case 0x1a96: c.cycles += 2; c.adc(0x5f); // fa96 adc $5f
+      case 0x1a98: c.cycles += 2; c.p &= ~0x01; // fa98 clc
       // LFA99
       case 0x1a99: c.cycles += 2; c.adc(0x52); // fa99 adc $52
       // a8
@@ -3767,12 +3767,12 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1ab2: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // fab2 lda $b2
       case 0x1ab4: c.cycles += 2; c.cmp(c.a, 0x50); // fab4 cmp $50
       case 0x1ab6: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xac5; continue; } // fab6 bcc $000d
-      case 0x1ab8: c.cycles += 2; c.x = c.setNZ(0x10); // fab8 ldx $10 (traced, not executed)
-      case 0x1aba: c.cycles += 3; c.write(0x22, c.x); if (bus.frame !== frame) { c.pc = hi | 0xabc; return true; } // faba stx $22 (traced, not executed)
-      case 0x1abc: c.cycles += 2; c.x = c.setNZ(0x01); // fabc ldx $01 (traced, not executed)
-      case 0x1abe: c.cycles += 3; c.write(0x23, c.x); if (bus.frame !== frame) { c.pc = hi | 0xac0; return true; } // fabe stx $23 (traced, not executed)
-      case 0x1ac0: c.cycles += 2; c.cmp(c.a, 0x78); // fac0 cmp $78 (traced, not executed)
-      case 0x1ac2: c.cycles += 3; pc = 0xfacf; continue; // fac2 jmp $facf (traced, not executed)
+      case 0x1ab8: c.cycles += 2; c.x = c.setNZ(0x10); // fab8 ldx $10
+      case 0x1aba: c.cycles += 3; c.write(0x22, c.x); if (bus.frame !== frame) { c.pc = hi | 0xabc; return true; } // faba stx $22
+      case 0x1abc: c.cycles += 2; c.x = c.setNZ(0x01); // fabc ldx $01
+      case 0x1abe: c.cycles += 3; c.write(0x23, c.x); if (bus.frame !== frame) { c.pc = hi | 0xac0; return true; } // fabe stx $23
+      case 0x1ac0: c.cycles += 2; c.cmp(c.a, 0x78); // fac0 cmp $78
+      case 0x1ac2: c.cycles += 3; pc = 0xfacf; continue; // fac2 jmp $facf
       // LFAC5
       // f0
       case 0x1ac5: c.cycles += 2; c.x = c.setNZ(0xf0); // fac5 ldx $f0
@@ -3785,7 +3785,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1ad1: c.cycles += 2; c.y = c.setNZ(0x10); // fad1 ldy $10
       case 0x1ad3: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xad7; continue; } // fad3 bcc $0002
       // f0
-      case 0x1ad5: c.cycles += 2; c.y = c.setNZ(0xf0); // fad5 ldy $f0 (traced, not executed)
+      case 0x1ad5: c.cycles += 2; c.y = c.setNZ(0xf0); // fad5 ldy $f0
       // LFAD7
       // e4
       case 0x1ad7: c.cycles += 4; c.write((0xe4 + c.x) & 0xff, c.y); if (bus.frame !== frame) { c.pc = hi | 0xad9; return true; } // fad7 sty $e4
@@ -3796,14 +3796,14 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1adf: c.cycles += 3; c.a = c.setNZ(c.read(0xb2)); // fadf lda $b2
       case 0x1ae1: c.cycles += 2; c.cmp(c.a, 0x50); // fae1 cmp $50
       case 0x1ae3: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xae7; continue; } // fae3 bcc $0002
-      case 0x1ae5: c.cycles += 2; c.sbc(0x50); // fae5 sbc $50 (traced, not executed)
+      case 0x1ae5: c.cycles += 2; c.sbc(0x50); // fae5 sbc $50
       // LFAE7
       case 0x1ae7: c.cycles += 2; c.cmp(c.a, 0x29); // fae7 cmp $29
       case 0x1ae9: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 1; pc = hi | 0xaef; continue; } // fae9 bcc $0004
       // ff
-      case 0x1aeb: c.cycles += 2; c.a = c.setNZ(c.a ^ 0xff); // faeb eor $ff (traced, not executed)
+      case 0x1aeb: c.cycles += 2; c.a = c.setNZ(c.a ^ 0xff); // faeb eor $ff
       // b0
-      case 0x1aed: c.cycles += 2; c.sbc(0xb0); // faed sbc $b0 (traced, not executed)
+      case 0x1aed: c.cycles += 2; c.sbc(0xb0); // faed sbc $b0
       // LFAEF
       case 0x1aef: c.cycles += 2; c.a = c.lsr(c.a); // faef lsr
       // fa
@@ -3866,8 +3866,8 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1b3a: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb3c; return true; } // fb3a sta $22
       case 0x1b3c: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0xb42; continue; } // fb3c bcs $0004
       // LFB3E
-      case 0x1b3e: c.cycles += 2; c.a = c.setNZ(0x00); // fb3e lda $00 (traced, not executed)
-      case 0x1b40: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb42; return true; } // fb40 sta $22 (traced, not executed)
+      case 0x1b3e: c.cycles += 2; c.a = c.setNZ(0x00); // fb3e lda $00
+      case 0x1b40: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb42; return true; } // fb40 sta $22
       // LFB42
       case 0x1b42: c.cycles += 2; c.a = c.setNZ(0x00); // fb42 lda $00
       // fd
@@ -3917,8 +3917,8 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1b84: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb86; return true; } // fb84 sta $22
       case 0x1b86: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 1; pc = hi | 0xb8c; continue; } // fb86 bcs $0004
       // LFB88
-      case 0x1b88: c.cycles += 2; c.a = c.setNZ(0x00); // fb88 lda $00 (traced, not executed)
-      case 0x1b8a: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb8c; return true; } // fb8a sta $22 (traced, not executed)
+      case 0x1b88: c.cycles += 2; c.a = c.setNZ(0x00); // fb88 lda $00
+      case 0x1b8a: c.cycles += 4; c.write((0x22 + c.x) & 0xff, c.a); if (bus.frame !== frame) { c.pc = hi | 0xb8c; return true; } // fb8a sta $22
       // LFB8C
       // fd
       case 0x1b8c: c.cycles += 5; c.rmw(0xfd, (v) => c.setNZ((v - 1) & 0xff)); // fb8c dec $fd
@@ -4056,16 +4056,16 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1c47: c.cycles += 3; c.bit(c.read(0xc6)); // fc47 bit $c6
       case 0x1c49: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0xc5c; continue; } // fc49 bmi $0011
       // e6
-      case 0x1c4b: c.cycles += 3; c.a = c.setNZ(c.read(0xe6)); // fc4b lda $e6 (traced, not executed)
-      case 0x1c4d: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0xc60; continue; } // fc4d bpl $0011 (traced, not executed)
-      case 0x1c4f: c.cycles += 2; c.x = c.setNZ(0x41); // fc4f ldx $41 (traced, not executed)
+      case 0x1c4b: c.cycles += 3; c.a = c.setNZ(c.read(0xe6)); // fc4b lda $e6
+      case 0x1c4d: c.cycles += 2; if (!(c.p & 0x80)) { c.cycles += 1; pc = hi | 0xc60; continue; } // fc4d bpl $0011
+      case 0x1c4f: c.cycles += 2; c.x = c.setNZ(0x41); // fc4f ldx $41
       // ca
-      case 0x1c51: c.cycles += 3; c.write(0xca, c.x); // fc51 stx $ca (traced, not executed)
+      case 0x1c51: c.cycles += 3; c.write(0xca, c.x); // fc51 stx $ca
       // ff
-      case 0x1c53: c.cycles += 2; c.cmp(c.a, 0xff); // fc53 cmp $ff (traced, not executed)
-      case 0x1c55: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0xc60; continue; } // fc55 bne $0009 (traced, not executed)
-      case 0x1c57: c.cycles += 2; c.x = c.setNZ(0x85); // fc57 ldx $85 (traced, not executed)
-      case 0x1c59: c.cycles += 6; { const r = hi | 0xc5b; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // fc59 jsr $fcc7 (traced, not executed)
+      case 0x1c53: c.cycles += 2; c.cmp(c.a, 0xff); // fc53 cmp $ff
+      case 0x1c55: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0xc60; continue; } // fc55 bne $0009
+      case 0x1c57: c.cycles += 2; c.x = c.setNZ(0x85); // fc57 ldx $85
+      case 0x1c59: c.cycles += 6; { const r = hi | 0xc5b; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // fc59 jsr $fcc7
       // LFC5C
       case 0x1c5c: c.cycles += 2; c.x = c.setNZ(0x01); // fc5c ldx $01
       // e6
@@ -4091,12 +4091,12 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1c78: c.cycles += 4; c.bit(c.read(0xf0e6)); pc = hi | 0xc7b; continue; // fc78 bit $f0e6 ; $FC78 bit: skips the next instruction on this path
       // LFC79
       // f0
-      case 0x1c79: c.cycles += 5; c.rmw(0xf0, (v) => c.setNZ((v + 1) & 0xff)); // fc79 inc $f0 (traced, not executed)
+      case 0x1c79: c.cycles += 5; c.rmw(0xf0, (v) => c.setNZ((v + 1) & 0xff)); // fc79 inc $f0
       case 0x1c7b: c.cycles += 2; c.x = c.setNZ(0x72); // fc7b ldx $72
       case 0x1c7d: c.cycles += 6; { const r = hi | 0xc7f; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfce6; continue; // fc7d jsr $fce6
       case 0x1c80: c.cycles += 2; if (!(c.p & 0x02)) { c.cycles += 1; pc = hi | 0xc89; continue; } // fc80 bne $0007
       // LFC82
-      case 0x1c82: c.cycles += 6; { const r = hi | 0xc84; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // fc82 jsr $fcc7 (traced, not executed)
+      case 0x1c82: c.cycles += 6; { const r = hi | 0xc84; c.push(r >> 8); c.push(r & 0xff); } pc = 0xfcc7; continue; // fc82 jsr $fcc7
       // LFC85
       // f0
       case 0x1c85: c.cycles += 3; c.a = c.setNZ(c.read(0xf0)); // fc85 lda $f0
@@ -4146,7 +4146,7 @@ export function run(c, bus, maxCycles = 400000) {
       // d8
       case 0x1cc2: c.cycles += 2; c.p &= ~0x08; // fcc2 cld
       case 0x1cc3: c.cycles += 2; if ((c.p & 0x01)) { c.cycles += 2; pc = hi | 0xd09; continue; } // fcc3 bcs $0044
-      case 0x1cc5: c.cycles += 2; c.x = c.setNZ(0x99); // fcc5 ldx $99 (traced, not executed)
+      case 0x1cc5: c.cycles += 2; c.x = c.setNZ(0x99); // fcc5 ldx $99
       // LFCC7
       case 0x1cc7: c.cycles += 2; c.p |= 0x01; // fcc7 sec
       // b6
@@ -4170,9 +4170,9 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1cde: c.cycles += 3; c.bit(c.read(0xf9)); // fcde bit $f9
       case 0x1ce0: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 2; pc = hi | 0xd09; continue; } // fce0 bmi $0027
       // f1
-      case 0x1ce2: c.cycles += 3; c.write(0xf1, c.a); // fce2 sta $f1 (traced, not executed)
+      case 0x1ce2: c.cycles += 3; c.write(0xf1, c.a); // fce2 sta $f1
       // b4
-      case 0x1ce4: c.cycles += 2; c.x = c.setNZ(0xb4); // fce4 ldx $b4 (traced, not executed)
+      case 0x1ce4: c.cycles += 2; c.x = c.setNZ(0xb4); // fce4 ldx $b4
       // LFCE6
       // ca
       case 0x1ce6: c.cycles += 3; c.write(0xca, c.x); // fce6 stx $ca
@@ -4182,8 +4182,8 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1cea: c.cycles += 3; c.write(0xc9, c.x); // fcea stx $c9
       case 0x1cec: c.cycles += 6; pc = (c.pull() | (c.pull() << 8)) + 1 & 0xffff; continue; // fcec rts
       // LFCED
-      case 0x1ced: c.cycles += 3; c.write(0x9a, c.x); // fced stx $9a (traced, not executed)
-      case 0x1cef: c.cycles += 3; c.write(0x9b, c.x); // fcef stx $9b (traced, not executed)
+      case 0x1ced: c.cycles += 3; c.write(0x9a, c.x); // fced stx $9a
+      case 0x1cef: c.cycles += 3; c.write(0x9b, c.x); // fcef stx $9b
       // LFCF1
       // ba
       case 0x1cf1: c.cycles += 3; c.write(0xba, c.x); // fcf1 stx $ba
@@ -4217,10 +4217,10 @@ export function run(c, bus, maxCycles = 400000) {
       // e3
       case 0x1d13: c.cycles += 3; c.a = c.setNZ(c.read(0xe3)); // fd13 lda $e3
       case 0x1d15: c.cycles += 2; if ((c.p & 0x02)) { c.cycles += 1; pc = hi | 0xd1d; continue; } // fd15 beq $0006
-      case 0x1d17: c.cycles += 3; c.bit(c.read(0x80)); // fd17 bit $80 (traced, not executed)
-      case 0x1d19: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0xd1d; continue; } // fd19 bmi $0002 (traced, not executed)
+      case 0x1d17: c.cycles += 3; c.bit(c.read(0x80)); // fd17 bit $80
+      case 0x1d19: c.cycles += 2; if ((c.p & 0x80)) { c.cycles += 1; pc = hi | 0xd1d; continue; } // fd19 bmi $0002
       // b0
-      case 0x1d1b: c.cycles += 5; c.rmw(0xb0, (v) => c.setNZ((v + 1) & 0xff)); // fd1b inc $b0 (traced, not executed)
+      case 0x1d1b: c.cycles += 5; c.rmw(0xb0, (v) => c.setNZ((v + 1) & 0xff)); // fd1b inc $b0
       // LFD1D
       case 0x1d1d: c.cycles += 2; c.x = c.setNZ(0x0f); // fd1d ldx $0f
       case 0x1d1f: c.cycles += 6; pc = (c.pull() | (c.pull() << 8)) + 1 & 0xffff; continue; // fd1f rts
@@ -4307,7 +4307,7 @@ export function run(c, bus, maxCycles = 400000) {
       case 0x1dfa: c.cycles += 2; c.cmp(c.a, 0xa0); // fdfa cmp $a0
       case 0x1dfc: c.cycles += 2; if (!(c.p & 0x01)) { c.cycles += 2; pc = hi | 0xe00; continue; } // fdfc bcc $0002
       // LFDFE
-      case 0x1dfe: c.cycles += 2; c.sbc(0x9f); // fdfe sbc $9f (traced, not executed)
+      case 0x1dfe: c.cycles += 2; c.sbc(0x9f); // fdfe sbc $9f
       // LFE00
       case 0x1e00: c.cycles += 3; c.write(0x02, c.a); if (bus.frame !== frame) { c.pc = hi | 0xe02; return true; } // fe00 sta $02
       case 0x1e02: c.cycles += 2; c.p |= 0x01; // fe02 sec

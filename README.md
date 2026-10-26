@@ -41,10 +41,17 @@ There was no published disassembly, so the cartridge was disassembled from scrat
    The cartridge is 8K with F8 bank switching: bank 0 is assembled at $D000,
    bank 1 at $F000, and the code dispatches on bank and address; every frame the
    game jumps to $F000, where `BIT $FFF8` switches to the drawing bank.
-4. `tools/verify-recomp.mjs [frames] [seed] [auto|random]` runs the translation
-   and the ROM side by side and compares registers, bank, cycles, RAM, every TIA
-   write and every pixel after each frame. 105,000 frames (the autosimulator's
-   mission and two random seeds): no differences.
+4. `tools/verify-recomp.mjs [frames] [seed] [auto|random|pilot]` runs the
+   translation and the ROM side by side and compares registers, bank, cycles,
+   RAM, every TIA write and every pixel after each frame. Inputs: the
+   autosimulator's whole mission; random console and stick input; take-overs
+   from the autopilot late in the mission (env `TAKEOVER`); and a scripted
+   pilot for flights 2 and 3 (env `FLIGHT`, `ASCENT`, `DUTY`) that follows the
+   manual's launch sequence by reading the flight number ($A0) and the mission
+   clock ($9C) from RAM. 340,000 frames: no differences.
+   `tools/verified-coverage.mjs` combines the runs: 2,921 of the 3,002
+   instructions (97%) were executed in the comparisons. `tools/cov-pilot.mjs`
+   is the same pilot for the coverage runs.
 
 `tools/gen-images.mjs` renders the site's pictures from the translation.
 

@@ -8,13 +8,25 @@
 // countdown to the landing, then over again. ('random'): Status (Select)
 // presses, Activate Countdown (Reset), and random joystick, fire, Color/B&W
 // and difficulty switches, so flights 1-3 start, abort and get piloted badly.
-// usage: node tools/verify-recomp.mjs [frames] [seed] [auto|random]
+// ('auto' with env TAKEOVER=frame): the autosimulator flies until that
+// frame, then random piloting takes over (the joystick hands over control).
+// ('pilot'): tools/cov-pilot.mjs's scripted launch (env FLIGHT 2|3, ASCENT
+// frames of steady climb, DUTY of the button), then random piloting with
+// engine and door switch moves; it reads the flight number and the clock
+// from the cartridge's RAM.
+// usage: node tools/verify-recomp.mjs [frames] [seed] [auto|random|pilot]
 import { VCS, loadRom } from './atari/vcs.mjs';
 import { ShuttleMachine } from '../src/shuttleMachine.mjs';
 import { ROM_DATA } from '../src/shuttleRomData.mjs';
 
 const frames = Number(process.argv[2] ?? 3000), seed = Number(process.argv[3] ?? 1), mode = process.argv[4] ?? 'random';
 const rom = new VCS(loadRom());
+// every instruction the cartridge executes during the comparison (bank << 12 | offset), saved to
+// tools/out/verified-<mode>-<seed>.json so tools/verified-coverage.mjs can combine the runs
+import { writeFileSync as saveFile } from 'node:fs';
+const ran = new Set();
+const romStep = rom.cpu.step.bind(rom.cpu);
+rom.cpu.step = () => { ran.add((rom.bank << 12) | (rom.cpu.pc & 0xfff)); return romStep(); };
 const js = new ShuttleMachine();
 const mapped = new Uint8Array(8192);
 for (const [at, h] of ROM_DATA) for (let i = 0; i < h.length / 2; i += 1) mapped[at + i] = 1;
@@ -32,9 +44,46 @@ const hex = (v) => v.toString(16);
 // Color/B&W (Primary Engines), bit 6 left difficulty (Backup Engines), bit 7
 // right difficulty (Cargo Doors/Landing Gear); low = pressed / B&W / B
 let stick = 0xff, fire = 0x80, held = 0x0b, bad = 0;
+// the pilot: a state machine over the cartridge's RAM (flight $A0, clock $9C)
+const P = { phase: 'boot', t: 0, sw: { primary: false, backup: false, doors: false }, hold: 0, input: { stick: 0xff, fire: false } };
+const FLIGHT_WANTED = Number(process.env.FLIGHT ?? 2), ASCENT = Number(process.env.ASCENT ?? 6000), DUTY = Number(process.env.DUTY ?? 1);
+const ramOf = (a) => rom.ram[a & 0x7f];
+function pilot() {
+  const o = { stick: 0xff, fire: false, select: false, reset: false };
+  P.t += 1;
+  if (P.phase === 'boot') { if (P.t > 60) { P.phase = 'select'; P.t = 0; } }
+  else if (P.phase === 'select') { if (ramOf(0xa0) === FLIGHT_WANTED || P.t > 600) { P.phase = 'settle'; P.t = 0; } else o.select = true; }
+  else if (P.phase === 'settle') { if (P.t > 30) { P.phase = 'countdown'; P.t = 0; } }
+  else if (P.phase === 'countdown') {
+    if (P.t <= 10) o.reset = true;
+    const met = ramOf(0x9c);
+    if (met <= 0x14 && P.t > 15) P.sw.primary = true;
+    o.fire = met <= 0x04 && P.t > 15 && (DUTY >= 1 || rand() < DUTY);
+    if ((met === 0 && P.t > 60) || P.t > 3000) { P.phase = 'ascent'; P.t = 0; }
+  } else if (P.phase === 'ascent') {
+    o.fire = DUTY >= 1 || rand() < DUTY;
+    if (P.t > ASCENT) { P.phase = 'free'; P.t = 0; }
+  } else {
+    if (P.hold-- <= 0) {
+      P.hold = 3 + Math.floor(rand() * 60);
+      P.input = { stick: [0xff, 0xef, 0xdf, 0xbf, 0x7f, 0xaf, 0x6f, 0x9f, 0x5f][Math.floor(rand() * 9)], fire: rand() < DUTY * 0.7 };
+      if (rand() < 1 / 12) P.sw.primary = !P.sw.primary;
+      if (rand() < 1 / 30) P.sw.doors = !P.sw.doors;
+      if (rand() < 1 / 80) P.sw.backup = !P.sw.backup;
+    }
+    o.stick = P.input.stick; o.fire = P.input.fire; o.select = rand() < 1 / 400;
+  }
+  return { stick: o.stick, fire: o.fire ? 0x00 : 0x80, swchb: (o.reset ? 0 : 1) | (o.select ? 0 : 2) | (P.sw.primary ? 8 : 0) | (P.sw.backup ? 0x40 : 0) | (P.sw.doors ? 0x80 : 0) };
+}
 for (let f = 0; f < frames; f += 1) {
   let swchb = held;
-  if (mode === 'auto') {
+  if (mode === 'pilot') {
+    ({ stick, fire, swchb } = pilot());
+  } else if (mode === 'auto' && process.env.TAKEOVER && f >= Number(process.env.TAKEOVER)) {
+    // the autosimulator flew up to here; touching the joystick hands over the controls
+    P.phase = 'free';
+    ({ stick, fire, swchb } = pilot());
+  } else if (mode === 'auto') {
     // every 45000 frames: Status held 150 frames (FLT# 3 -> 1), then Activate Countdown
     const t = f % 45000;
     stick = 0xff; fire = 0x80; swchb = 0x0b;
@@ -68,6 +117,7 @@ for (let f = 0; f < frames; f += 1) {
   if (pr && pr.some((row, y) => row.some((c, x) => c !== pj[y][x]))) diffs.push('picture differs');
   if (diffs.length) { bad += 1; if (bad <= 5) console.log(`frame ${f}: ${diffs.slice(0, 8).join(', ')}`); if (bad === 5) break; }
 }
+saveFile(`tools/out/verified-${mode}${mode === 'pilot' ? `-${FLIGHT_WANTED}-${ASCENT}-${DUTY}` : ''}${process.env.TAKEOVER ? `-t${process.env.TAKEOVER}` : ''}-${seed}.json`, JSON.stringify([...ran]));
 if (unmapped.size) console.log('reads outside the data image:', [...unmapped].slice(0, 20).join(', '));
-console.log({ frames, mode, seed, bad, unmapped: unmapped.size });
+console.log({ frames, mode, seed, ...(mode === 'pilot' ? { flight: FLIGHT_WANTED, ascent: ASCENT, duty: DUTY } : {}), bad, unmapped: unmapped.size });
 process.exit(bad || unmapped.size ? 1 : 0);
