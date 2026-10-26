@@ -107,16 +107,16 @@
       position: fixed; z-index: 11; left: 0; right: 0; bottom: 0; width: auto; margin: 0;
       padding: 12px max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
     }
-    @media (pointer: coarse) { body.fs .deck small { display: none; } }
+    @media (pointer: coarse) { body.fs .deck .con { display: none; } }
     @media (pointer: coarse) and (orientation: portrait) {
       body.fs .tv { width: min(100%, calc((100dvh - 420px) * 640 / 392)); }
       body.fs .deck { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media (pointer: coarse) and (orientation: landscape) {
-      body.fs .tv { width: min(calc(100% - 330px), calc((100dvh - 150px) * 640 / 392)); }
+      body.fs .tv { width: min(calc(100% - 330px), calc((100dvh - 160px) * 640 / 392)); }
       body.fs .deck { width: min(calc(100% - 320px), 760px); gap: 4px; }
       body.fs .deck button { font-size: 11px; }
-      body.fs #status-line { display: none; }
+      body.fs #status-line { position: absolute; z-index: 12; top: max(6px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: 270px; margin: 0; font-size: 9px; letter-spacing: 0; line-height: 1.35; text-align: left; }
       body.fs #tc { pointer-events: none; top: 0; align-items: center; }
       body.fs #tc button { pointer-events: auto; opacity: 0.8; }
       body.fs .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 40px); }
@@ -246,11 +246,11 @@
     </div>
     <div id="status-line" data-hint aria-live="polite">Press Power on, then hold Status to pick a flight</div>
     <div class="deck" aria-label="Flight deck console">
-      <button type="button" data-press="status"><b>Status</b><small>hold · <span class="kb">X · </span>Game Select</small></button>
-      <button type="button" data-press="countdown"><b>Activate Countdown</b><small>hold · <span class="kb">Enter · </span>Game Reset</small></button>
-      <button type="button" data-toggle="primary" aria-pressed="false"><b>Primary Engines</b><span data-state>SHUTDOWN</span><small><span class="kb">E · </span>Color/B&amp;W</small></button>
-      <button type="button" data-toggle="backup" aria-pressed="false"><b>Backup Engines</b><span data-state>SHUTDOWN</span><small><span class="kb">B · </span>left difficulty</small></button>
-      <button type="button" data-toggle="doors" aria-pressed="false"><b>Cargo Doors / Gear</b><span data-state>CLOSED / UP</span><small><span class="kb">C · </span>right difficulty</small></button>
+      <button type="button" data-press="status"><b>Status</b><small>hold<span class="kb"> · X</span><span class="con"> · Game Select</span></small></button>
+      <button type="button" data-press="countdown"><b>Activate Countdown</b><small>hold<span class="kb"> · Enter</span><span class="con"> · Game Reset</span></small></button>
+      <button type="button" data-toggle="primary" aria-pressed="false"><b>Primary Engines</b><span data-state>SHUTDOWN</span><small class="con"><span class="kb">E · </span>Color/B&amp;W</small></button>
+      <button type="button" data-toggle="backup" aria-pressed="false"><b>Backup Engines</b><span data-state>SHUTDOWN</span><small class="con"><span class="kb">B · </span>left difficulty</small></button>
+      <button type="button" data-toggle="doors" aria-pressed="false"><b>Cargo Doors / Gear</b><span data-state>CLOSED / UP</span><small class="con"><span class="kb">C · </span>right difficulty</small></button>
     </div>
     <div class="fs-bar">
       <button type="button" data-pause>Pause</button>

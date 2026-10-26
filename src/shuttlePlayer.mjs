@@ -96,7 +96,17 @@ export function mountPlayer(root) {
     const text = paused ? 'PAUSED' : started && !touch && !pad && document.activeElement !== canvas ? 'Click the screen to use the keyboard' : '';
     note.textContent = text;
     note.hidden = !text;
+    placeNote();
   }
+  // keep the note in the part of the picture that is on screen
+  function placeNote() {
+    if (!note || note.hidden) return;
+    const box = canvas.getBoundingClientRect();
+    const top = Math.min(Math.max(10, 10 - box.top), box.height - note.offsetHeight - 10);
+    note.style.top = `${Math.max(10, top)}px`;
+  }
+  addEventListener('scroll', placeNote, { passive: true });
+  addEventListener('resize', placeNote);
   const silence = () => audio.setSilent(muted || paused || !started);
 
   function step() {
