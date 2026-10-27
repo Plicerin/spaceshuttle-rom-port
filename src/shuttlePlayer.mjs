@@ -174,7 +174,8 @@ export function mountPlayer(root) {
     if (edges.lb) flip('primary');
     if (edges.rb) flip('doors');
     if (edges.lt) flip('backup');
-    if (!!pad !== padShown) { padShown = !!pad; showNote(); }
+    // the hint names the pad's buttons or the keys, so it changes even while paused
+    if (!!pad !== padShown) { padShown = !!pad; showNote(); if (started) setHint(phaseHint()); }
     if (!paused && !document.hidden) {
       acc += dt;
       while (acc >= FRAME_MS) { step(); acc -= FRAME_MS; }
