@@ -71,7 +71,7 @@ export const RAM = {
   0xF5: ['fuelBurn', 'fuel burnt each 16th frame by the main engines ($F054)'],
   0xF7: ['stickTouched', '$FF once the joystick moves: in flight 1 the pilot has taken over'],
   0xF8: ['simulator', '$FF in flights 1 and 2: no fuel used, most aborts overridden'],
-  0xF9: ['autopilot', '$FF in flight 1 (the autosimulator) until the stick is touched'],
+  0xF9: ['autopilot', '$FF for the whole of flight 1 (the autosimulator): set by Activate Countdown, cleared when the flight ends; touching the stick does not clear it ($F7 records the take-over)'],
   0xFA: ['temp0', 'scratch'],
   0xFB: ['temp1', 'scratch'],
   0xFC: ['temp2', 'scratch'],
