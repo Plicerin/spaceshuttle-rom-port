@@ -58,7 +58,7 @@ export function mountPlayer(root) {
   // countdown waits for all three)
   const toggles = { primary: false, backup: false, doors: false };
   const down = { status: false, countdown: false };
-  let last = 0, acc = 0, pad = null, frames = 0, padShown = false, padWake = false;
+  let last = 0, acc = 0, pad = null, frames = 0, padShown = false, padWake = false, forgiven = 0;
 
   const setHint = (text) => { if (hint && hint.textContent !== text) hint.textContent = text; };
   // the hint follows the flight: the cartridge's flight number ($A0), whether
@@ -83,7 +83,8 @@ export function mountPlayer(root) {
   };
   function phaseHint() {
     const ram = game.bus.ram, at = (a) => ram[a & 0x7f];
-    const phase = at(0xb5), abort = at(0x9f);
+    // in flights 1 and 2 an overridden abort leaves its code in $9F while the flight goes on
+    const phase = at(0xb5), abort = at(0x9f) === forgiven ? 0 : at(0x9f);
     const pick = `Hold ${name('status')} to pick a flight (1 flies itself). Engines shut down, doors closed, then press ${name('countdown')}.`;
     if (!at(0xb6)) {
       if (abort && at(0xa0) === 1 && at(0xf7) !== 0xff) return `The demonstration flight ends here. ${pick}`;
@@ -103,7 +104,7 @@ export function mountPlayer(root) {
     return [
       'Primary Engines on at MET-015. Hold the button the moment MET-004 appears.',
       'Keep T on C with taps, follow the trajectory, keep the plane centred. Engines off at about 205 miles.',
-      'Orbit: engines on, pitch -28, engines off, doors open. Dock: Z, Y, then X to 0. Deorbit once X reaches 128.',
+      'Orbit: engines on, pitch -28, engines off, doors open. Dock: Z, Y, then X to 0. Deorbit once X reaches 128, at 23.9 with Z at 0.',
       'Reentry: pitch +24, engines off, doors closed. Follow the course on the computer screen.',
       'Landing: turn right to line up. Left dot on the S-F curve; steer toward the right dot to bring it to the runway line. Gear down when range goes negative, then hold forward.',
     ][phase] ?? '';
@@ -139,6 +140,8 @@ export function mountPlayer(root) {
     game.bus.swchb = (on('countdown') ? 0 : 0x01) | (on('status') ? 0 : 0x02)
       | (toggles.primary ? 0x08 : 0) | (toggles.backup ? 0x40 : 0) | (toggles.doors ? 0x80 : 0);
     game.runFrame();
+    // a code already showing while the flight goes on was overridden; a real abort ends the flight on the frame it is set
+    if (game.bus.ram[0xb6 & 0x7f]) forgiven = game.bus.ram[0x9f & 0x7f];
     tapped.clear();
     audio.update(game.bus.audio);
     frames += 1;
